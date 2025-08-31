@@ -1,0 +1,10 @@
+# Node
+node_modules/
+dist/
+.env
+
+# Logs
+npm-debug.log*
+
+# Sistema
+.DS_Store
