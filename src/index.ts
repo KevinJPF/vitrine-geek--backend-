@@ -1,6 +1,6 @@
-import express, { Request, Response } from 'express';
-import dotenv from 'dotenv';
-import clienteRoutes from './routes/clienteRoutes';
+import express, { Request, Response } from "express";
+import dotenv from "dotenv";
+import clienteRoutes from "./routes/clienteRoutes";
 
 dotenv.config();
 
@@ -10,11 +10,13 @@ const PORT = process.env.PORT || 3000;
 // Middleware para JSON
 app.use(express.json());
 
-// Rotas
-app.use('/clientes', clienteRoutes);
+// #region Rotas
+app.use("/clientes", clienteRoutes);
+// #endregion
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('API rodando!');
+// Rota padrão
+app.get("/", (req: Request, res: Response) => {
+  res.send("API rodando!");
 });
 
 app.listen(PORT, () => {

@@ -1,22 +1,23 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
+import ClienteFachada from "../facades/ClienteFacade";
 
-interface Cliente {
-  id: number;
-  name: string;
-  email: string;
-}
+export const getClientes = async (req: Request, res: Response) => {
+  const clientes = await ClienteFachada.getInstance().getAll();
+  res.json(clientes);
+};
 
-let users: Cliente[] = [];
-
-export const getClientes = (req: Request, res: Response) => {
-  const newCliente: Cliente = { id: 1, name: "kevin", email: "kevin@email.com" };
-  users.push(newCliente)
-  res.json(users);
+export const getClientePorId = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const cliente = await ClienteFachada.getInstance().getById(id);
+  if (!cliente) {
+    return res.status(404).json({ message: "Usuário não encontrado" });
+  }
+  res.json(cliente);
 };
 
 export const createCliente = (req: Request, res: Response) => {
-  const { name, email } = req.body;
-  const newCliente: Cliente = { id: users.length + 1, name, email };
-  users.push(newCliente);
-  res.status(201).json(newCliente);
+  //   const { name, email } = req.body;
+  //   const newCliente: Cliente = { id: users.length + 1, name, email };
+  //   users.push(newCliente);
+  //   res.status(201).json(newCliente);
 };
