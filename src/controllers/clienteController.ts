@@ -58,7 +58,9 @@ export const createCliente = async (req: Request, res: Response) => {
     req.body.email,
     req.body.senha,
     req.body.ranking,
-    req.body.cliente_ativo
+    req.body.cliente_ativo,
+    req.body.enderecos,
+    req.body.cartoes
   );
 
   // Cria o cliente no banco de dados
@@ -89,7 +91,9 @@ export const updateCliente = async (req: Request, res: Response) => {
     req.body.email,
     req.body.senha,
     req.body.ranking,
-    req.body.cliente_ativo
+    req.body.cliente_ativo,
+    req.body.enderecos,
+    req.body.cartoes
   );
 
   // Verifica se o cliente existe
@@ -113,6 +117,33 @@ export const deleteCliente = async (req: Request, res: Response) => {
     return res.status(404).json({ message: "Cliente não encontrado" });
   }
 
-  await ClienteFachada.getInstance().delete(id);
-  res.status(204).send();
+  res.status(200).send(await ClienteFachada.getInstance().delete(id));
+};
+
+export const activateOrDeactivateCliente = async (
+  req: Request,
+  res: Response
+) => {
+  const id = Number(req.params.id);
+
+  const clienteExistente = await ClienteFachada.getInstance().getById(id);
+  if (!clienteExistente) {
+    return res.status(404).json({ message: "Cliente não encontrado" });
+  }
+
+  const ativo = !clienteExistente.cliente_ativo;
+
+  const resultado = await ClienteFachada.getInstance().activateOrDeactivate(
+    id,
+    ativo
+  );
+  if (resultado) {
+    return res.status(200).json({
+      message: `Cliente ${ativo ? "ativado" : "desativado"} com sucesso`,
+    });
+  }
+
+  res
+    .status(500)
+    .json({ message: `Erro ao ${ativo ? "ativar" : "desativar"} cliente` });
 };

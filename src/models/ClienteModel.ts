@@ -1,43 +1,48 @@
-import { BaseEntidade } from "./BaseEntidade";
+import { Cartao } from "./CartaoModel";
+import { Endereco } from "./EnderecoModel";
 
-export class Cliente extends BaseEntidade {
+export class Cliente {
+  id_cliente?: number;
   genero: string;
-  nomeCliente: string;
-  dataNascimento: string;
+  nome_cliente: string;
+  data_nascimento: string;
   cpf: string;
-  telefoneTipo: string;
-  telefoneNumero: string;
+  telefone_tipo: string;
+  telefone_numero: string;
   email: string;
   senha: string;
   ranking: number;
-  clienteAtivo: boolean;
-  // List<Endereco> enderecos;
-  // List<CartaoCredito> cartoesCredito;
+  cliente_ativo: boolean;
+  enderecos?: Endereco[];
+  cartoes?: Cartao[];
 
   constructor(
     genero: string,
     nomeCliente: string,
     dataNascimento: string,
     cpf: string,
-    telefoneTipo: string,
-    telefoneNumero: string,
+    telefone_tipo: string,
+    telefone_numero: string,
     email: string,
     senha: string,
     ranking: number,
-    clienteAtivo: boolean,
-    id?: number
+    cliente_ativo: boolean,
+    enderecos?: Endereco[],
+    cartoes?: Cartao[],
+    id_cliente?: number
   ) {
-    super();
-    this.id = id;
+    this.id_cliente = id_cliente;
     this.genero = genero;
-    this.nomeCliente = nomeCliente;
-    this.dataNascimento = dataNascimento;
+    this.nome_cliente = nomeCliente;
+    this.data_nascimento = dataNascimento;
     this.cpf = cpf;
-    this.telefoneTipo = telefoneTipo;
-    this.telefoneNumero = telefoneNumero;
+    this.telefone_tipo = telefone_tipo;
+    this.telefone_numero = telefone_numero;
     this.email = email;
     this.senha = senha;
     this.ranking = ranking;
-    this.clienteAtivo = clienteAtivo;
+    this.cliente_ativo = cliente_ativo;
+    this.enderecos = enderecos;
+    this.cartoes = cartoes;
   }
 }

@@ -39,19 +39,19 @@ export class ClienteDAO extends BaseDAO<Cliente> {
       "INSERT INTO clientes (genero, nome_cliente, data_nascimento, cpf, telefone_tipo, telefone_numero, email, senha, ranking, cliente_ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         cliente.genero,
-        cliente.nomeCliente,
-        cliente.dataNascimento,
+        cliente.nome_cliente,
+        cliente.data_nascimento,
         cliente.cpf,
-        cliente.telefoneTipo,
-        cliente.telefoneNumero,
+        cliente.telefone_tipo,
+        cliente.telefone_numero,
         cliente.email,
         cliente.senha,
         cliente.ranking,
-        cliente.clienteAtivo,
+        cliente.cliente_ativo,
       ]
     );
-    const insertId = (result as any).insertId;
-    return { id: insertId, ...cliente };
+    cliente.id_cliente = (result as any).insertId;
+    return cliente;
   }
 
   async update(id: number, cliente: Cliente): Promise<boolean> {
@@ -59,15 +59,15 @@ export class ClienteDAO extends BaseDAO<Cliente> {
       "UPDATE clientes SET genero = ?, nome_cliente = ?, data_nascimento = ?, cpf = ?, telefone_tipo = ?, telefone_numero = ?, email = ?, senha = ?, ranking = ?, cliente_ativo = ? WHERE id_cliente = ?",
       [
         cliente.genero,
-        cliente.nomeCliente,
-        cliente.dataNascimento,
+        cliente.nome_cliente,
+        cliente.data_nascimento,
         cliente.cpf,
-        cliente.telefoneTipo,
-        cliente.telefoneNumero,
+        cliente.telefone_tipo,
+        cliente.telefone_numero,
         cliente.email,
         cliente.senha,
         cliente.ranking,
-        cliente.clienteAtivo,
+        cliente.cliente_ativo,
         id,
       ]
     );
@@ -86,7 +86,18 @@ export class ClienteDAO extends BaseDAO<Cliente> {
     const cliente = entidade as Cliente;
     const sql = "UPDATE clientes SET senha = ? WHERE id_cliente = ?";
 
-    const [result] = await this.db.query(sql, [cliente.senha, cliente.id]);
+    const [result] = await this.db.query(sql, [
+      cliente.senha,
+      cliente.id_cliente,
+    ]);
     return (result as any).affectedRows > 0 ? "sucesso" : "erro";
+  }
+
+  async activateOrDeactivate(id: number, ativo: boolean): Promise<boolean> {
+    const [result] = await this.db.query(
+      "UPDATE clientes SET cliente_ativo = ? WHERE id_cliente = ?",
+      [ativo, id]
+    );
+    return (result as any).affectedRows > 0;
   }
 }

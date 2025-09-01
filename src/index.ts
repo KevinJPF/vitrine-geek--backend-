@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import clienteRoutes from "./routes/clienteRoutes";
+import cartaoRoutes from "./routes/cartaoRoutes";
+import enderecoRoutes from "./routes/enderecoRoutes";
 
 dotenv.config();
 
@@ -12,6 +14,8 @@ app.use(express.json());
 
 // #region Rotas
 app.use("/clientes", clienteRoutes);
+app.use("/cartoes", cartaoRoutes);
+app.use("/enderecos", enderecoRoutes);
 // #endregion
 
 // Rota padrão
