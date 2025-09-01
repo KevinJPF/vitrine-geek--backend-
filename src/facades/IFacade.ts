@@ -1,6 +1,6 @@
-import { IEntidade } from "../models/IEntidade";
+import { BaseEntidade } from "../models/BaseEntidade";
 
-export interface IFacade<T extends IEntidade> {
+export interface IFacade<T extends BaseEntidade> {
   // Métodos abstratos que devem ser implementados pelas subclasses
   getAll(): Promise<T[]>;
   getById(id: number): Promise<T | null>;

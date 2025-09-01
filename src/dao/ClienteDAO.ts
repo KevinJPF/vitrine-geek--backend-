@@ -34,27 +34,59 @@ export class ClienteDAO extends BaseDAO<Cliente> {
     return clientes.length ? clientes[0] : null;
   }
 
-  async create(user: Cliente): Promise<Cliente> {
+  async create(cliente: Cliente): Promise<Cliente> {
     const [result] = await this.db.query(
-      "INSERT INTO clientes (name, email) VALUES (?, ?)",
-      [user.name, user.email]
+      "INSERT INTO clientes (genero, nome_cliente, data_nascimento, cpf, telefone_tipo, telefone_numero, email, senha, ranking, cliente_ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        cliente.genero,
+        cliente.nomeCliente,
+        cliente.dataNascimento,
+        cliente.cpf,
+        cliente.telefoneTipo,
+        cliente.telefoneNumero,
+        cliente.email,
+        cliente.senha,
+        cliente.ranking,
+        cliente.clienteAtivo,
+      ]
     );
     const insertId = (result as any).insertId;
-    return { id: insertId, ...user };
+    return { id: insertId, ...cliente };
   }
 
-  async update(id: number, user: Cliente): Promise<boolean> {
+  async update(id: number, cliente: Cliente): Promise<boolean> {
     const [result] = await this.db.query(
-      "UPDATE clientes SET name = ?, email = ? WHERE id = ?",
-      [user.name, user.email, id]
+      "UPDATE clientes SET genero = ?, nome_cliente = ?, data_nascimento = ?, cpf = ?, telefone_tipo = ?, telefone_numero = ?, email = ?, senha = ?, ranking = ?, cliente_ativo = ? WHERE id_cliente = ?",
+      [
+        cliente.genero,
+        cliente.nomeCliente,
+        cliente.dataNascimento,
+        cliente.cpf,
+        cliente.telefoneTipo,
+        cliente.telefoneNumero,
+        cliente.email,
+        cliente.senha,
+        cliente.ranking,
+        cliente.clienteAtivo,
+        id,
+      ]
     );
     return (result as any).affectedRows > 0;
   }
 
   async delete(id: number): Promise<boolean> {
-    const [result] = await this.db.query("DELETE FROM clientes WHERE id = ?", [
-      id,
-    ]);
+    const [result] = await this.db.query(
+      "DELETE FROM clientes WHERE id_cliente = ?",
+      [id]
+    );
     return (result as any).affectedRows > 0;
+  }
+
+  async changePassword(entidade: Cliente): Promise<string> {
+    const cliente = entidade as Cliente;
+    const sql = "UPDATE clientes SET senha = ? WHERE id_cliente = ?";
+
+    const [result] = await this.db.query(sql, [cliente.senha, cliente.id]);
+    return (result as any).affectedRows > 0 ? "sucesso" : "erro";
   }
 }

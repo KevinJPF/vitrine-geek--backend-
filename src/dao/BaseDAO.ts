@@ -1,8 +1,8 @@
 import { DatabaseSingleton } from "../config/database";
-import { IEntidade } from "../models/IEntidade";
+import { BaseEntidade } from "../models/BaseEntidade";
 
 // Classe base para todos os DAOs
-export abstract class BaseDAO<T extends IEntidade> {
+export abstract class BaseDAO<T extends BaseEntidade> {
   // Variável protegida para o pool de conexões
   protected db = DatabaseSingleton.getInstance().getPool();
 
