@@ -21,7 +21,9 @@ export class CartaoDAO extends BaseDAO<Cartao> {
   // #endregion
 
   async getAll(): Promise<Cartao[]> {
-    const [rows] = await this.db.query("SELECT * FROM cartoes_credito");
+    const [rows] = await this.db.query(
+      "SELECT C.*, B.nome_bandeira FROM cartoes_credito C JOIN bandeiras B ON C.id_bandeira = B.id_bandeira"
+    );
     return rows as Cartao[];
   }
 
@@ -77,9 +79,22 @@ export class CartaoDAO extends BaseDAO<Cartao> {
 
   async getByClienteId(clienteId: number): Promise<Cartao[]> {
     const [rows] = await this.db.query(
-      "SELECT * FROM cartoes_credito WHERE id_cliente = ?",
+      "SELECT C.*, B.nome_bandeira FROM cartoes_credito C JOIN bandeiras B ON C.id_bandeira = B.id_bandeira WHERE id_cliente = ?",
       [clienteId]
     );
     return rows as Cartao[];
+  }
+
+  async getBandeiras(): Promise<any[]> {
+    const [rows]: any[] = await this.db.query("SELECT * FROM bandeiras");
+    return rows;
+  }
+
+  async getBandeiraById(id: number): Promise<any[]> {
+    const [rows]: any[] = await this.db.query(
+      "SELECT * FROM bandeiras WHERE id_bandeira = ?",
+      [id]
+    );
+    return rows;
   }
 }

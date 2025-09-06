@@ -85,6 +85,6 @@ export class ValidarDDD implements IStrategy<string> {
   ]);
 
   async process(ddd: string): Promise<boolean> {
-    return /^\d{2}$/.test(ddd) && this.dddValidos.has(ddd);
+    return this.dddValidos.has(ddd);
   }
 }

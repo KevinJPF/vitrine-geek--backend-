@@ -18,6 +18,6 @@ export class ValidarString implements IStrategy<string> {
   // #endregion
 
   async process(valor: string): Promise<boolean> {
-    return valor.trim() === "";
+    return valor.trim() !== "";
   }
 }

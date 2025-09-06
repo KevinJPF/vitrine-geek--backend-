@@ -7,6 +7,7 @@ export class Cartao {
   codigo_seguranca: string;
   favorito: boolean;
   id_cliente: number;
+  nome_bandeira?: string;
 
   constructor(
     nome_cartao: string,
@@ -16,6 +17,7 @@ export class Cartao {
     codigo_seguranca: string,
     favorito: boolean,
     id_cliente: number,
+    nome_bandeira?: string,
     id_cartao?: number
   ) {
     this.id_cartao = id_cartao;
@@ -26,5 +28,6 @@ export class Cartao {
     this.favorito = favorito;
     this.codigo_seguranca = codigo_seguranca;
     this.id_cliente = id_cliente;
+    this.nome_bandeira = nome_bandeira;
   }
 }

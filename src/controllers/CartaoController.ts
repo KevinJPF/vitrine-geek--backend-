@@ -104,3 +104,8 @@ export const deleteCartao = async (req: Request, res: Response) => {
 
   res.status(200).send(await CartaoFacade.getInstance().delete(id));
 };
+
+export const getBandeiras = async (req: Request, res: Response) => {
+  const cartoes = await CartaoFacade.getInstance().getBandeiras();
+  res.json(cartoes);
+};

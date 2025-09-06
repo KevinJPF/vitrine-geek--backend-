@@ -99,19 +99,24 @@ export default class ClienteFacade implements IFacade<Cliente> {
     if (camposInvalidos) {
       return camposInvalidos.slice(0, -2); // Remove a última vírgula ', '
     }
-    // return "sucesso";
+    // return "";
 
     // await ClienteDAO.getInstance().create(cliente);
 
     for (let cartao of cliente.cartoes!) {
       // cartao.id_cliente = cliente.id_cliente!;
       cartao.id_cliente = 1;
-      await CartaoFacade.getInstance().create(cartao);
+      camposInvalidos += await CartaoFacade.getInstance().create(cartao);
     }
-    // for (let endereco of cliente.enderecos!) {
-    //   endereco.id_cliente = cliente.id_cliente!;
-    //   await EnderecoFacade.getInstance().create(endereco);
-    // }
+    for (let endereco of cliente.enderecos!) {
+      // endereco.id_cliente = cliente.id_cliente!;
+      endereco.id_cliente = 1!;
+      camposInvalidos += await EnderecoFacade.getInstance().create(endereco);
+    }
+
+    if (camposInvalidos) {
+      return camposInvalidos.slice(0);
+    }
 
     return "sucesso";
   }
@@ -164,7 +169,7 @@ export default class ClienteFacade implements IFacade<Cliente> {
     if (camposInvalidos) {
       return camposInvalidos.slice(0, -2); // Remove a última vírgula ', '
     }
-    return "sucesso";
+    return "";
 
     if (await ClienteDAO.getInstance().update(id, cliente)) {
       for (let cartao of cliente.cartoes!) {
@@ -180,7 +185,7 @@ export default class ClienteFacade implements IFacade<Cliente> {
       }
     }
 
-    return "sucesso";
+    return "";
   }
 
   async delete(id: number): Promise<boolean> {
