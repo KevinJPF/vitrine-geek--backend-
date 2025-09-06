@@ -3,15 +3,14 @@ import { ClienteDAO } from "../dao/ClienteDAO";
 import { IFacade } from "./IFacade";
 import CartaoFacade from "./CartaoFacade";
 import EnderecoFacade from "./EnderecoFacade";
-import { ValidarEmail } from "../strategies/ValidarEmail";
-import { ValidarDDD } from "../strategies/ValidarDDD";
+import { ValidarEmail } from "../strategies/Cliente/ValidarEmail";
+import { ValidarDDD } from "../strategies/Cliente/ValidarDDD";
+import { ValidarCPF } from "../strategies/Cliente/ValidarCPF";
+import { ValidarTelefone } from "../strategies/Cliente/ValidarTelefone";
+import { ValidarSenha } from "../strategies/Cliente/ValidarSenha";
+import { ValidarGenero } from "../strategies/Cliente/ValidarGenero";
 import { ValidarData } from "../strategies/ValidarData";
-import { ValidarCPF } from "../strategies/ValidarCPF";
-import { ValidarTelefone } from "../strategies/ValidarTelefone";
-import { ValidarSenha } from "../strategies/ValidarSenha";
-import { ValidarGenero } from "../strategies/ValidarGenero";
 import { ValidarString } from "../strategies/ValidarString";
-import { ValidarTipoTelefone } from "../strategies/ValidarTipoTelefone";
 
 export default class ClienteFacade implements IFacade<Cliente> {
   // #region singletonConfig
@@ -73,7 +72,7 @@ export default class ClienteFacade implements IFacade<Cliente> {
     camposInvalidos += (await ValidarCPF.getInstance().process(cliente.cpf))
       ? ""
       : "CPF, ";
-    camposInvalidos += (await ValidarTipoTelefone.getInstance().process(
+    camposInvalidos += (await ValidarString.getInstance().process(
       cliente.telefone_tipo
     ))
       ? ""
@@ -120,27 +119,48 @@ export default class ClienteFacade implements IFacade<Cliente> {
   async update(id: number, cliente: Cliente): Promise<string> {
     let camposInvalidos: string = "";
 
-    camposInvalidos += await ValidarString.getInstance().process(
+    camposInvalidos += (await ValidarString.getInstance().process(
       cliente.nome_cliente
-    );
-    camposInvalidos += await ValidarGenero.getInstance().process(
+    ))
+      ? ""
+      : "Nome, ";
+    camposInvalidos += (await ValidarGenero.getInstance().process(
       cliente.genero
-    );
-    camposInvalidos += await ValidarData.getInstance().process(
+    ))
+      ? ""
+      : "Genero, ";
+    camposInvalidos += (await ValidarData.getInstance().process(
       cliente.data_nascimento
-    );
-    camposInvalidos += await ValidarCPF.getInstance().process(cliente.cpf);
-    camposInvalidos += await ValidarTipoTelefone.getInstance().process(
+    ))
+      ? ""
+      : "Data Nascimento, ";
+    camposInvalidos += (await ValidarCPF.getInstance().process(cliente.cpf))
+      ? ""
+      : "CPF, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
       cliente.telefone_tipo
-    );
-    camposInvalidos += await ValidarDDD.getInstance().process(
+    ))
+      ? ""
+      : "Tipo Telefone, ";
+    camposInvalidos += (await ValidarDDD.getInstance().process(
       cliente.telefone_ddd
-    );
-    camposInvalidos += await ValidarTelefone.getInstance().process(
+    ))
+      ? ""
+      : "DDD, ";
+    camposInvalidos += (await ValidarTelefone.getInstance().process(
       cliente.telefone_numero
-    );
-    camposInvalidos += await ValidarEmail.getInstance().process(cliente.email);
-    camposInvalidos += await ValidarSenha.getInstance().process(cliente.senha!);
+    ))
+      ? ""
+      : "Telefone, ";
+    camposInvalidos += (await ValidarEmail.getInstance().process(cliente.email))
+      ? ""
+      : "Email, ";
+    camposInvalidos += (await ValidarSenha.getInstance().process(
+      cliente.senha!
+    ))
+      ? ""
+      : "Senha, ";
+
     if (camposInvalidos) {
       return camposInvalidos.slice(0, -2); // Remove a última vírgula ', '
     }

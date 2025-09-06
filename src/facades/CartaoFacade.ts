@@ -1,4 +1,6 @@
 import { Cartao } from "../models/CartaoModel";
+import { ValidarCodSeguranca } from "../strategies/ValidarCodSeguranca";
+import { ValidarNumeroCartao } from "../strategies/ValidarNumeroCartao";
 import { ValidarString } from "../strategies/ValidarString";
 import { CartaoDAO } from "./../dao/CartaoDAO";
 import { IFacade } from "./IFacade";
@@ -41,6 +43,16 @@ export default class CartaoFacade implements IFacade<Cartao> {
     ))
       ? ""
       : "Nome Impresso, ";
+    camposInvalidos += (await ValidarNumeroCartao.getInstance().process(
+      cartao.numero_cartao
+    ))
+      ? ""
+      : "Numero do Cartao, ";
+    camposInvalidos += (await ValidarCodSeguranca.getInstance().process(
+      cartao.codigo_seguranca
+    ))
+      ? ""
+      : "Codigo de Seguranca, ";
 
     if (camposInvalidos) {
       return camposInvalidos.slice(0, -2); // Remove a última vírgula ', '

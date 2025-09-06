@@ -1,4 +1,4 @@
-import { IStrategy } from "./IStrategy";
+import { IStrategy } from "../IStrategy";
 
 export class ValidarGenero implements IStrategy<string> {
   // #region singletonConfig

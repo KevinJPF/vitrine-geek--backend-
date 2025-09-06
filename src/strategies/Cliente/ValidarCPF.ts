@@ -1,4 +1,4 @@
-import { IStrategy } from "./IStrategy";
+import { IStrategy } from "../IStrategy";
 
 export class ValidarCPF implements IStrategy<string> {
   private VALIDATEONLYNUMBERS: boolean = true;
