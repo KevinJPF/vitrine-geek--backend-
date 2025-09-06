@@ -1,4 +1,5 @@
 import { Cartao } from "../models/CartaoModel";
+import { ValidarString } from "../strategies/ValidarString";
 import { CartaoDAO } from "./../dao/CartaoDAO";
 import { IFacade } from "./IFacade";
 
@@ -27,12 +28,34 @@ export default class CartaoFacade implements IFacade<Cartao> {
     return await CartaoDAO.getInstance().getById(id);
   }
 
-  async create(entity: Cartao): Promise<Cartao> {
-    return await CartaoDAO.getInstance().create(entity);
+  async create(cartao: Cartao): Promise<string> {
+    let camposInvalidos: string = "";
+
+    camposInvalidos += (await ValidarString.getInstance().process(
+      cartao.nome_cartao
+    ))
+      ? ""
+      : "Nome do Cartao, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
+      cartao.nome_impresso
+    ))
+      ? ""
+      : "Nome Impresso, ";
+
+    if (camposInvalidos) {
+      return camposInvalidos.slice(0, -2); // Remove a última vírgula ', '
+    }
+    return "sucesso";
+
+    await CartaoDAO.getInstance().create(cartao);
+
+    return "sucesso";
   }
 
-  async update(id: number, entity: Cartao): Promise<boolean> {
-    return await CartaoDAO.getInstance().update(id, entity);
+  async update(id: number, cartao: Cartao): Promise<string> {
+    return (await CartaoDAO.getInstance().update(id, cartao))
+      ? "sucesso"
+      : "erro";
   }
 
   async delete(id: number): Promise<boolean> {

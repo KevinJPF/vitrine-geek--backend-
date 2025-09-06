@@ -36,13 +36,14 @@ export class ClienteDAO extends BaseDAO<Cliente> {
 
   async create(cliente: Cliente): Promise<Cliente> {
     const [result] = await this.db.query(
-      "INSERT INTO clientes (genero, nome_cliente, data_nascimento, cpf, telefone_tipo, telefone_numero, email, senha, ranking, cliente_ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO clientes (genero, nome_cliente, data_nascimento, cpf, telefone_tipo, telefone_ddd, telefone_numero, email, senha, ranking, cliente_ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         cliente.genero,
         cliente.nome_cliente,
         cliente.data_nascimento,
         cliente.cpf,
         cliente.telefone_tipo,
+        cliente.telefone_ddd,
         cliente.telefone_numero,
         cliente.email,
         cliente.senha,
@@ -56,13 +57,14 @@ export class ClienteDAO extends BaseDAO<Cliente> {
 
   async update(id: number, cliente: Cliente): Promise<boolean> {
     const [result] = await this.db.query(
-      "UPDATE clientes SET genero = ?, nome_cliente = ?, data_nascimento = ?, cpf = ?, telefone_tipo = ?, telefone_numero = ?, email = ?, senha = ?, ranking = ?, cliente_ativo = ? WHERE id_cliente = ?",
+      "UPDATE clientes SET genero = ?, nome_cliente = ?, data_nascimento = ?, cpf = ?, telefone_tipo = ?, telefone_ddd = ?, telefone_numero = ?, email = ?, senha = ?, ranking = ?, cliente_ativo = ? WHERE id_cliente = ?",
       [
         cliente.genero,
         cliente.nome_cliente,
         cliente.data_nascimento,
         cliente.cpf,
         cliente.telefone_tipo,
+        cliente.telefone_ddd,
         cliente.telefone_numero,
         cliente.email,
         cliente.senha,

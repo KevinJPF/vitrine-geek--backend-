@@ -8,11 +8,12 @@ export class Cliente {
   data_nascimento: string;
   cpf: string;
   telefone_tipo: string;
+  telefone_ddd: string;
   telefone_numero: string;
   email: string;
-  senha: string;
-  ranking: number;
-  cliente_ativo: boolean;
+  senha?: string;
+  ranking?: number;
+  cliente_ativo?: boolean;
   enderecos?: Endereco[];
   cartoes?: Cartao[];
 
@@ -22,13 +23,14 @@ export class Cliente {
     dataNascimento: string,
     cpf: string,
     telefone_tipo: string,
+    telefone_ddd: string,
     telefone_numero: string,
     email: string,
-    senha: string,
-    ranking: number,
-    cliente_ativo: boolean,
+    senha?: string,
     enderecos?: Endereco[],
     cartoes?: Cartao[],
+    ranking?: number,
+    cliente_ativo?: boolean,
     id_cliente?: number
   ) {
     this.id_cliente = id_cliente;
@@ -37,6 +39,7 @@ export class Cliente {
     this.data_nascimento = dataNascimento;
     this.cpf = cpf;
     this.telefone_tipo = telefone_tipo;
+    this.telefone_ddd = telefone_ddd;
     this.telefone_numero = telefone_numero;
     this.email = email;
     this.senha = senha;

@@ -9,11 +9,10 @@ const validarCamposObrigatorios = (cliente: any) => {
     "data_nascimento",
     "cpf",
     "telefone_tipo",
+    "telefone_ddd",
     "telefone_numero",
     "email",
     "senha",
-    "ranking",
-    "cliente_ativo",
   ];
 
   const missingFields = requiredFields.filter(
@@ -54,11 +53,10 @@ export const createCliente = async (req: Request, res: Response) => {
     req.body.data_nascimento,
     req.body.cpf,
     req.body.telefone_tipo,
+    req.body.telefone_ddd,
     req.body.telefone_numero,
     req.body.email,
     req.body.senha,
-    req.body.ranking,
-    req.body.cliente_ativo,
     req.body.enderecos,
     req.body.cartoes
   );
@@ -66,8 +64,12 @@ export const createCliente = async (req: Request, res: Response) => {
   // Cria o cliente no banco de dados
   const newCliente = await ClienteFachada.getInstance().create(novoCliente);
 
-  // Retorna o cliente criado caso sucesso
-  res.status(201).json(newCliente);
+  if (newCliente === "sucesso") {
+    // Retorna o cliente criado caso sucesso
+    res.status(201).json(novoCliente);
+  } else {
+    res.status(400).json({ campos_invalidos: newCliente });
+  }
 };
 
 export const updateCliente = async (req: Request, res: Response) => {
@@ -87,11 +89,10 @@ export const updateCliente = async (req: Request, res: Response) => {
     req.body.data_nascimento,
     req.body.cpf,
     req.body.telefone_tipo,
+    req.body.telefone_ddd,
     req.body.telefone_numero,
     req.body.email,
     req.body.senha,
-    req.body.ranking,
-    req.body.cliente_ativo,
     req.body.enderecos,
     req.body.cartoes
   );
@@ -107,7 +108,12 @@ export const updateCliente = async (req: Request, res: Response) => {
     ...clienteAtualizado,
   });
 
-  res.json(updatedCliente);
+  if (updatedCliente === "sucesso") {
+    // Retorna o cliente criado caso sucesso
+    res.status(200).json(clienteAtualizado);
+  } else {
+    res.status(400).json({ campos_invalidos: updatedCliente });
+  }
 };
 
 export const deleteCliente = async (req: Request, res: Response) => {
