@@ -19,11 +19,11 @@ export class ValidarCPF implements IStrategy<string> {
   }
   // #endregion
 
-  async process(cpf: string): Promise<boolean> {
+  async process(cpf: string, id?: number): Promise<boolean> {
     let cpfLimpo = cpf.replace(/\D/g, "");
     if (cpfLimpo.length !== 11 || /^(\d)\1+$/.test(cpfLimpo)) return false;
 
-    if (await ClienteDAO.getInstance().getByCPF(cpfLimpo)) return false;
+    if (await ClienteDAO.getInstance().getByCPF(cpfLimpo, id)) return false;
 
     if (this.VALIDATEONLYNUMBERS) return true;
 

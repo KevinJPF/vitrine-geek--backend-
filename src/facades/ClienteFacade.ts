@@ -210,7 +210,8 @@ export default class ClienteFacade implements IFacade<Cliente> {
       ? ""
       : "Data Nascimento, ";
     camposInvalidos.cliente += (await ValidarCPF.getInstance().process(
-      cliente.cpf
+      cliente.cpf,
+      id
     ))
       ? ""
       : "CPF, ";
@@ -230,7 +231,8 @@ export default class ClienteFacade implements IFacade<Cliente> {
       ? ""
       : "Telefone, ";
     camposInvalidos.cliente += (await ValidarEmail.getInstance().process(
-      cliente.email
+      cliente.email,
+      id
     ))
       ? ""
       : "Email, ";

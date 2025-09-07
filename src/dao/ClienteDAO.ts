@@ -36,7 +36,7 @@ export class ClienteDAO extends BaseDAO<Cliente> {
 
   async create(cliente: Cliente): Promise<number> {
     const [result] = await this.db.query(
-      "INSERT INTO clientes (genero, nome_cliente, data_nascimento, cpf, telefone_tipo, telefone_ddd, telefone_numero, email, senha, ranking, cliente_ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO clientes (genero, nome_cliente, data_nascimento, cpf, telefone_tipo, telefone_ddd, telefone_numero, email, senha, ranking, cliente_ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         cliente.genero,
         cliente.nome_cliente,
@@ -47,8 +47,8 @@ export class ClienteDAO extends BaseDAO<Cliente> {
         cliente.telefone_numero,
         cliente.email,
         cliente.senha,
-        cliente.ranking,
-        cliente.cliente_ativo,
+        0,
+        true,
       ]
     );
 
@@ -57,7 +57,7 @@ export class ClienteDAO extends BaseDAO<Cliente> {
 
   async update(id: number, cliente: Cliente): Promise<boolean> {
     const [result] = await this.db.query(
-      "UPDATE clientes SET genero = ?, nome_cliente = ?, data_nascimento = ?, cpf = ?, telefone_tipo = ?, telefone_ddd = ?, telefone_numero = ?, email = ?, senha = ?, ranking = ?, cliente_ativo = ? WHERE id_cliente = ?",
+      "UPDATE clientes SET genero = ?, nome_cliente = ?, data_nascimento = ?, cpf = ?, telefone_tipo = ?, telefone_ddd = ?, telefone_numero = ?, email = ?, senha = ? WHERE id_cliente = ?",
       [
         cliente.genero,
         cliente.nome_cliente,
@@ -68,8 +68,6 @@ export class ClienteDAO extends BaseDAO<Cliente> {
         cliente.telefone_numero,
         cliente.email,
         cliente.senha,
-        cliente.ranking,
-        cliente.cliente_ativo,
         id,
       ]
     );
@@ -84,10 +82,30 @@ export class ClienteDAO extends BaseDAO<Cliente> {
     return (result as any).affectedRows > 0;
   }
 
-  async getByCPF(cpf: string): Promise<Cliente | null> {
-    const [rows] = await this.db.query("SELECT * FROM clientes WHERE cpf = ?", [
-      cpf,
-    ]);
+  async getByCPF(cpf: string, id?: number): Promise<Cliente | null> {
+    let sql = "SELECT * FROM clientes WHERE cpf = ?";
+    const params: any[] = [cpf];
+
+    if (id !== undefined) {
+      sql += " AND id_cliente <> ?";
+      params.push(id);
+    }
+
+    const [rows] = await this.db.query(sql, params);
+    const clientes = rows as Cliente[];
+    return clientes.length ? clientes[0] : null;
+  }
+
+  async getByEmail(email: string, id?: number): Promise<Cliente | null> {
+    let sql = "SELECT * FROM clientes WHERE email = ?";
+    const params: any[] = [email];
+
+    if (id !== undefined) {
+      sql += " AND id_cliente <> ?";
+      params.push(id);
+    }
+
+    const [rows] = await this.db.query(sql, params);
     const clientes = rows as Cliente[];
     return clientes.length ? clientes[0] : null;
   }

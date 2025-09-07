@@ -1,3 +1,4 @@
+import { ClienteDAO } from "../../dao/ClienteDAO";
 import { IStrategy } from "../IStrategy";
 
 export class ValidarEmail implements IStrategy<string> {
@@ -17,8 +18,15 @@ export class ValidarEmail implements IStrategy<string> {
   }
   // #endregion
 
-  async process(email: string): Promise<boolean> {
+  async process(email: string, id?: number): Promise<boolean> {
     // Lógica de validação de email
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    // Verifica se o email já está cadastrado
+    if (emailValido) {
+      if (await ClienteDAO.getInstance().getByEmail(email, id)) return false;
+    }
+
+    return emailValido;
   }
 }
