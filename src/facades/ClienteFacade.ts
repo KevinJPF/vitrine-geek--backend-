@@ -20,6 +20,7 @@ import { ValidarData } from "../strategies/ValidarData";
 import { ValidarString } from "../strategies/ValidarString";
 import { ValidarFavorito } from "../strategies/Cliente/ValidarFavorito";
 import { ValidarEnderecos } from "../strategies/Cliente/ValidarEnderecos";
+import { Criptografia } from "../strategies/Criptografia";
 
 export default class ClienteFacade implements IFacade<Cliente> {
   // #region singletonConfig
@@ -135,6 +136,8 @@ export default class ClienteFacade implements IFacade<Cliente> {
     if (camposInvalidos.cliente) {
       camposInvalidos.cliente = camposInvalidos.cliente.slice(0, -2); // Remove a última vírgula ', '
       return camposInvalidos;
+    } else {
+      cliente.senha = await Criptografia.getInstance().hash(cliente.senha!);
     }
 
     const clienteId = await ClienteDAO.getInstance().create(cliente);
@@ -255,6 +258,8 @@ export default class ClienteFacade implements IFacade<Cliente> {
     if (camposInvalidos.cliente) {
       camposInvalidos.cliente = camposInvalidos.cliente.slice(0, -2); // Remove a última vírgula ', '
       return camposInvalidos;
+    } else {
+      cliente.senha = await Criptografia.getInstance().hash(cliente.senha!);
     }
 
     if (await ClienteDAO.getInstance().update(id, cliente)) {
