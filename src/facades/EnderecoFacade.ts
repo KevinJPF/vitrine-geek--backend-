@@ -83,7 +83,7 @@ export default class EnderecoFacade implements IFacade<Endereco> {
     if (camposInvalidos) {
       return { campos_invalidos: camposInvalidos.slice(0, -2) }; // Remove a última vírgula ', '
     }
-    return {};
+    // return {};
 
     return (await EnderecoDAO.getInstance().create(endereco))
       ? {}
@@ -94,6 +94,61 @@ export default class EnderecoFacade implements IFacade<Endereco> {
     id: number,
     endereco: Endereco
   ): Promise<{ [key: string]: any }> {
+    let camposInvalidos: string = "";
+
+    camposInvalidos += id ? "" : "ID do Endereco, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
+      endereco.nome_endereco
+    ))
+      ? ""
+      : "Nome do Endereco, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
+      endereco.tipo_residencia
+    ))
+      ? ""
+      : "Tipo de Residencia, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
+      endereco.tipo_logradouro
+    ))
+      ? ""
+      : "Tipo de Logradouro, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
+      endereco.logradouro
+    ))
+      ? ""
+      : "Logradouro, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
+      endereco.numero
+    ))
+      ? ""
+      : "Numero, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
+      endereco.bairro
+    ))
+      ? ""
+      : "Bairro, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
+      endereco.cidade
+    ))
+      ? ""
+      : "Cidade, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
+      endereco.pais
+    ))
+      ? ""
+      : "Pais, ";
+    camposInvalidos += (await ValidarCEP.getInstance().process(endereco.cep))
+      ? ""
+      : "CEP, ";
+    camposInvalidos += (await ValidarUF.getInstance().process(endereco.estado))
+      ? ""
+      : "Estado, ";
+
+    if (camposInvalidos) {
+      return { campos_invalidos: camposInvalidos.slice(0, -2) }; // Remove a última vírgula ', '
+    }
+    // return {};
+
     return (await EnderecoDAO.getInstance().update(id, endereco))
       ? {}
       : { status: "erro" };

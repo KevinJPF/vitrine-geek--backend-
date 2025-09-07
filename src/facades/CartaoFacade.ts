@@ -72,6 +72,7 @@ export default class CartaoFacade implements IFacade<Cartao> {
   async update(id: number, cartao: Cartao): Promise<{ [key: string]: any }> {
     let camposInvalidos: string = "";
 
+    camposInvalidos += id ? "" : "ID do Cartao, ";
     camposInvalidos += (await ValidarString.getInstance().process(
       cartao.nome_cartao
     ))
@@ -101,7 +102,7 @@ export default class CartaoFacade implements IFacade<Cartao> {
     if (camposInvalidos) {
       return { campos_invalidos: camposInvalidos.slice(0, -2) }; // Remove a última vírgula ', '
     }
-    return {};
+    // return {};
 
     return (await CartaoDAO.getInstance().update(id, cartao))
       ? {}

@@ -56,7 +56,7 @@ export class EnderecoDAO extends BaseDAO<Endereco> {
   }
 
   async update(id: number, endereco: Endereco): Promise<boolean> {
-    let [result] = await this.db.query(
+    const [result] = await this.db.query(
       "UPDATE enderecos SET logradouro = ?, numero = ?, bairro = ?, cep = ?, cidade = ?, estado = ?, pais = ? WHERE id_endereco = ?",
       [
         endereco.logradouro,
@@ -69,7 +69,7 @@ export class EnderecoDAO extends BaseDAO<Endereco> {
         id,
       ]
     );
-    [result] = await this.db.query(
+    const [result2] = await this.db.query(
       "UPDATE clientes_enderecos SET nome_endereco = ?, tipo_residencia = ?, tipo_logradouro = ?, obs_endereco = ?, endereco_entrega = ?, endereco_cobranca = ?, favorito = ? WHERE id_cliente = ? AND id_endereco = ?",
       [
         endereco.nome_endereco,

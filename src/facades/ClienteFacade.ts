@@ -254,6 +254,11 @@ export default class ClienteFacade implements IFacade<Cliente> {
     ))
       ? ""
       : "Mais de um endereco favorito, ";
+    camposInvalidos.cliente += (await ValidarEnderecos.getInstance().process(
+      cliente.enderecos!
+    ))
+      ? ""
+      : "Obrigatorio ao menos um endereco de entrega e cobranca, ";
 
     if (camposInvalidos.cliente) {
       camposInvalidos.cliente = camposInvalidos.cliente.slice(0, -2); // Remove a última vírgula ', '
