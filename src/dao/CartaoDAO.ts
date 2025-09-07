@@ -36,7 +36,7 @@ export class CartaoDAO extends BaseDAO<Cartao> {
     return cartoes_credito.length ? cartoes_credito[0] : null;
   }
 
-  async create(cartao: Cartao): Promise<Cartao> {
+  async create(cartao: Cartao): Promise<number> {
     const [result] = await this.db.query(
       "INSERT INTO cartoes_credito (nome_cartao, numero_cartao, nome_impresso, id_bandeira, codigo_seguranca, favorito, id_cliente) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
@@ -49,8 +49,8 @@ export class CartaoDAO extends BaseDAO<Cartao> {
         cartao.id_cliente,
       ]
     );
-    cartao.id_cartao = (result as any).insertId;
-    return cartao;
+
+    return (result as any).insertId;
   }
 
   async update(id: number, cartao: Cartao): Promise<boolean> {

@@ -4,8 +4,9 @@ import {
   createCliente,
   getClientePorId,
   updateCliente,
-  deleteCliente,
+  updateSenhaCliente,
   activateOrDeactivateCliente,
+  deleteCliente,
 } from "../controllers/ClienteController";
 
 const router = Router();
@@ -22,8 +23,11 @@ router.post("/", createCliente);
 // Rota de atualização de cliente
 router.put("/:id", updateCliente);
 
+// Rota de atualização de senha de cliente
+router.patch("/senha/:id", updateSenhaCliente);
+
 // Rota de ativação/desativação de cliente
-router.patch("/:id", activateOrDeactivateCliente);
+router.patch("/ativar-desativar/:id", activateOrDeactivateCliente);
 
 // Rota de exclusão de cliente
 router.delete("/:id", deleteCliente);

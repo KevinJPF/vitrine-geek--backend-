@@ -30,7 +30,7 @@ export default class CartaoFacade implements IFacade<Cartao> {
     return await CartaoDAO.getInstance().getById(id);
   }
 
-  async create(cartao: Cartao): Promise<string> {
+  async create(cartao: Cartao): Promise<{ [key: string]: any }> {
     let camposInvalidos: string = "";
 
     camposInvalidos += (await ValidarString.getInstance().process(
@@ -60,14 +60,16 @@ export default class CartaoFacade implements IFacade<Cartao> {
         : "Bandeira do Cartao, ";
 
     if (camposInvalidos) {
-      return camposInvalidos.slice(0, -2); // Remove a última vírgula ', '
+      return { campos_invalidos: camposInvalidos.slice(0, -2) }; // Remove a última vírgula ', '
     }
-    return "";
+    // return {};
 
-    return (await CartaoDAO.getInstance().create(cartao)) ? "" : "erro";
+    return (await CartaoDAO.getInstance().create(cartao))
+      ? {}
+      : { status: "erro" };
   }
 
-  async update(id: number, cartao: Cartao): Promise<string> {
+  async update(id: number, cartao: Cartao): Promise<{ [key: string]: any }> {
     let camposInvalidos: string = "";
 
     camposInvalidos += (await ValidarString.getInstance().process(
@@ -97,11 +99,13 @@ export default class CartaoFacade implements IFacade<Cartao> {
         : "Bandeira do Cartao, ";
 
     if (camposInvalidos) {
-      return camposInvalidos.slice(0, -2); // Remove a última vírgula ', '
+      return { campos_invalidos: camposInvalidos.slice(0, -2) }; // Remove a última vírgula ', '
     }
-    return "";
+    return {};
 
-    return (await CartaoDAO.getInstance().update(id, cartao)) ? "" : "erro";
+    return (await CartaoDAO.getInstance().update(id, cartao))
+      ? {}
+      : { status: "erro" };
   }
 
   async delete(id: number): Promise<boolean> {

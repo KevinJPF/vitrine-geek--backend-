@@ -30,7 +30,7 @@ export default class EnderecoFacade implements IFacade<Endereco> {
     return await EnderecoDAO.getInstance().getById(id);
   }
 
-  async create(endereco: Endereco): Promise<string> {
+  async create(endereco: Endereco): Promise<{ [key: string]: any }> {
     let camposInvalidos: string = "";
 
     camposInvalidos += (await ValidarString.getInstance().process(
@@ -81,15 +81,22 @@ export default class EnderecoFacade implements IFacade<Endereco> {
       : "Estado, ";
 
     if (camposInvalidos) {
-      return camposInvalidos.slice(0, -2); // Remove a última vírgula ', '
+      return { campos_invalidos: camposInvalidos.slice(0, -2) }; // Remove a última vírgula ', '
     }
-    return "";
+    return {};
 
-    return (await EnderecoDAO.getInstance().create(endereco)) ? "" : "erro";
+    return (await EnderecoDAO.getInstance().create(endereco))
+      ? {}
+      : { status: "erro" };
   }
 
-  async update(id: number, endereco: Endereco): Promise<string> {
-    return (await EnderecoDAO.getInstance().update(id, endereco)) ? "" : "erro";
+  async update(
+    id: number,
+    endereco: Endereco
+  ): Promise<{ [key: string]: any }> {
+    return (await EnderecoDAO.getInstance().update(id, endereco))
+      ? {}
+      : { status: "erro" };
   }
 
   async delete(id: number): Promise<boolean> {

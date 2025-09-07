@@ -64,7 +64,7 @@ export const createCliente = async (req: Request, res: Response) => {
   // Cria o cliente no banco de dados
   const newCliente = await ClienteFachada.getInstance().create(novoCliente);
 
-  if (newCliente === "sucesso") {
+  if (Object.keys(newCliente).length === 0) {
     // Retorna o cliente criado caso sucesso
     res.status(201).json(novoCliente);
   } else {
@@ -108,11 +108,11 @@ export const updateCliente = async (req: Request, res: Response) => {
     ...clienteAtualizado,
   });
 
-  if (updatedCliente === "sucesso") {
+  if (Object.keys(updatedCliente).length === 0) {
     // Retorna o cliente criado caso sucesso
     res.status(200).json(clienteAtualizado);
   } else {
-    res.status(400).json({ campos_invalidos: updatedCliente });
+    res.status(400).json(updatedCliente);
   }
 };
 
@@ -152,4 +152,31 @@ export const activateOrDeactivateCliente = async (
   res
     .status(500)
     .json({ message: `Erro ao ${ativo ? "ativar" : "desativar"} cliente` });
+};
+
+export const updateSenhaCliente = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const { senha } = req.body;
+
+  // Verifica se a nova senha foi fornecida
+  if (!senha) {
+    return res.status(400).json({ message: "Nova senha não fornecida" });
+  }
+
+  const clienteExistente = await ClienteFachada.getInstance().getById(id);
+  if (!clienteExistente) {
+    return res.status(404).json({ message: "Cliente não encontrado" });
+  }
+
+  // Atualiza a senha do cliente
+  const resultado = await ClienteFachada.getInstance().changePassword(
+    id,
+    senha
+  );
+
+  if (resultado) {
+    return res.status(200).json({ message: "Senha atualizada com sucesso" });
+  }
+
+  res.status(500).json({ message: "Erro ao atualizar senha" });
 };

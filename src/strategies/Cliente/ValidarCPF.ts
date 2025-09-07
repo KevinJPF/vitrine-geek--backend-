@@ -1,3 +1,4 @@
+import { ClienteDAO } from "../../dao/ClienteDAO";
 import { IStrategy } from "../IStrategy";
 
 export class ValidarCPF implements IStrategy<string> {
@@ -21,6 +22,8 @@ export class ValidarCPF implements IStrategy<string> {
   async process(cpf: string): Promise<boolean> {
     let cpfLimpo = cpf.replace(/\D/g, "");
     if (cpfLimpo.length !== 11 || /^(\d)\1+$/.test(cpfLimpo)) return false;
+
+    if (await ClienteDAO.getInstance().getByCPF(cpfLimpo)) return false;
 
     if (this.VALIDATEONLYNUMBERS) return true;
 

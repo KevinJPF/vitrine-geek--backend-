@@ -34,7 +34,7 @@ export class EnderecoDAO extends BaseDAO<Endereco> {
     return enderecos.length ? enderecos[0] : null;
   }
 
-  async create(endereco: Endereco): Promise<Endereco> {
+  async create(endereco: Endereco): Promise<number> {
     const [result] = await this.db.query(
       "INSERT INTO enderecos (logradouro, numero, bairro, cep, cidade, estado, pais) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
@@ -52,7 +52,7 @@ export class EnderecoDAO extends BaseDAO<Endereco> {
     // Vincula o endereço ao cliente na tabela relacional
     await this.linkToCliente(endereco);
 
-    return endereco;
+    return (result as any).insertId;
   }
 
   async update(id: number, endereco: Endereco): Promise<boolean> {

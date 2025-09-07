@@ -1,8 +1,15 @@
+// Model
 import { Cliente } from "../models/ClienteModel";
+
+// DAO
 import { ClienteDAO } from "../dao/ClienteDAO";
+
+// Facades
 import { IFacade } from "./IFacade";
 import CartaoFacade from "./CartaoFacade";
 import EnderecoFacade from "./EnderecoFacade";
+
+// Strategies
 import { ValidarEmail } from "../strategies/Cliente/ValidarEmail";
 import { ValidarDDD } from "../strategies/Cliente/ValidarDDD";
 import { ValidarCPF } from "../strategies/Cliente/ValidarCPF";
@@ -11,6 +18,8 @@ import { ValidarSenha } from "../strategies/Cliente/ValidarSenha";
 import { ValidarGenero } from "../strategies/Cliente/ValidarGenero";
 import { ValidarData } from "../strategies/ValidarData";
 import { ValidarString } from "../strategies/ValidarString";
+import { ValidarFavorito } from "../strategies/Cliente/ValidarFavorito";
+import { ValidarEnderecos } from "../strategies/Cliente/ValidarEnderecos";
 
 export default class ClienteFacade implements IFacade<Cliente> {
   // #region singletonConfig
@@ -51,141 +60,247 @@ export default class ClienteFacade implements IFacade<Cliente> {
     return cliente;
   }
 
-  async create(cliente: Cliente): Promise<string> {
-    let camposInvalidos: string = "";
+  async create(cliente: Cliente): Promise<{ [key: string]: any }> {
+    let camposInvalidos: {
+      cliente: string;
+      cartoes: [{}?];
+      enderecos: [{}?];
+    } = {
+      cliente: "",
+      cartoes: [],
+      enderecos: [],
+    };
 
-    camposInvalidos += (await ValidarString.getInstance().process(
+    camposInvalidos.cliente += (await ValidarString.getInstance().process(
       cliente.nome_cliente
     ))
       ? ""
       : "Nome, ";
-    camposInvalidos += (await ValidarGenero.getInstance().process(
+    camposInvalidos.cliente += (await ValidarGenero.getInstance().process(
       cliente.genero
     ))
       ? ""
       : "Genero, ";
-    camposInvalidos += (await ValidarData.getInstance().process(
+    camposInvalidos.cliente += (await ValidarData.getInstance().process(
       cliente.data_nascimento
     ))
       ? ""
       : "Data Nascimento, ";
-    camposInvalidos += (await ValidarCPF.getInstance().process(cliente.cpf))
+    camposInvalidos.cliente += (await ValidarCPF.getInstance().process(
+      cliente.cpf
+    ))
       ? ""
       : "CPF, ";
-    camposInvalidos += (await ValidarString.getInstance().process(
+    camposInvalidos.cliente += (await ValidarString.getInstance().process(
       cliente.telefone_tipo
     ))
       ? ""
       : "Tipo Telefone, ";
-    camposInvalidos += (await ValidarDDD.getInstance().process(
+    camposInvalidos.cliente += (await ValidarDDD.getInstance().process(
       cliente.telefone_ddd
     ))
       ? ""
       : "DDD, ";
-    camposInvalidos += (await ValidarTelefone.getInstance().process(
+    camposInvalidos.cliente += (await ValidarTelefone.getInstance().process(
       cliente.telefone_numero
     ))
       ? ""
       : "Telefone, ";
-    camposInvalidos += (await ValidarEmail.getInstance().process(cliente.email))
+    camposInvalidos.cliente += (await ValidarEmail.getInstance().process(
+      cliente.email
+    ))
       ? ""
       : "Email, ";
-    camposInvalidos += (await ValidarSenha.getInstance().process(
+    camposInvalidos.cliente += (await ValidarSenha.getInstance().process(
       cliente.senha!
     ))
       ? ""
       : "Senha, ";
+    camposInvalidos.cliente += (await ValidarFavorito.getInstance().process(
+      cliente.cartoes!
+    ))
+      ? ""
+      : "Mais de um cartao favorito, ";
+    camposInvalidos.cliente += (await ValidarFavorito.getInstance().process(
+      cliente.enderecos!
+    ))
+      ? ""
+      : "Mais de um endereco favorito, ";
+    camposInvalidos.cliente += (await ValidarEnderecos.getInstance().process(
+      cliente.enderecos!
+    ))
+      ? ""
+      : "Obrigatorio ao menos um endereco de entrega e cobranca, ";
 
-    if (camposInvalidos) {
-      return camposInvalidos.slice(0, -2); // Remove a última vírgula ', '
-    }
-    // return "";
-
-    // await ClienteDAO.getInstance().create(cliente);
-
-    for (let cartao of cliente.cartoes!) {
-      // cartao.id_cliente = cliente.id_cliente!;
-      cartao.id_cliente = 1;
-      camposInvalidos += await CartaoFacade.getInstance().create(cartao);
-    }
-    for (let endereco of cliente.enderecos!) {
-      // endereco.id_cliente = cliente.id_cliente!;
-      endereco.id_cliente = 1!;
-      camposInvalidos += await EnderecoFacade.getInstance().create(endereco);
-    }
-
-    if (camposInvalidos) {
-      return camposInvalidos.slice(0);
+    if (camposInvalidos.cliente) {
+      camposInvalidos.cliente = camposInvalidos.cliente.slice(0, -2); // Remove a última vírgula ', '
+      return camposInvalidos;
     }
 
-    return "sucesso";
+    const clienteId = await ClienteDAO.getInstance().create(cliente);
+
+    for (let i = 0; i < cliente.cartoes!.length; i++) {
+      const cartao = cliente.cartoes![i];
+      cartao.id_cliente = clienteId;
+
+      const camposInvalidosCartao = await CartaoFacade.getInstance().create(
+        cartao
+      );
+
+      if (camposInvalidosCartao.campos_invalidos) {
+        const key = `cartao_${i}`;
+        camposInvalidos.cartoes[i] = {
+          [key]: camposInvalidosCartao.campos_invalidos,
+        };
+      }
+    }
+
+    for (let i = 0; i < cliente.enderecos!.length; i++) {
+      const endereco = cliente.enderecos![i];
+      endereco.id_cliente = clienteId;
+
+      const camposInvalidosEndereco = await EnderecoFacade.getInstance().create(
+        endereco
+      );
+
+      if (camposInvalidosEndereco.campos_invalidos) {
+        const key = `endereco_${i}`;
+        camposInvalidos.enderecos[i] = {
+          [key]: camposInvalidosEndereco.campos_invalidos,
+        };
+      }
+    }
+
+    if (
+      camposInvalidos.cliente !== "" ||
+      camposInvalidos.cartoes.length > 0 ||
+      camposInvalidos.enderecos.length > 0
+    ) {
+      ClienteDAO.getInstance().delete(clienteId);
+      return camposInvalidos;
+    }
+
+    return {};
   }
 
-  async update(id: number, cliente: Cliente): Promise<string> {
-    let camposInvalidos: string = "";
+  async update(id: number, cliente: Cliente): Promise<{ [key: string]: any }> {
+    let camposInvalidos: {
+      cliente: string;
+      cartoes: [{}?];
+      enderecos: [{}?];
+    } = {
+      cliente: "",
+      cartoes: [],
+      enderecos: [],
+    };
 
-    camposInvalidos += (await ValidarString.getInstance().process(
+    camposInvalidos.cliente += (await ValidarString.getInstance().process(
       cliente.nome_cliente
     ))
       ? ""
       : "Nome, ";
-    camposInvalidos += (await ValidarGenero.getInstance().process(
+    camposInvalidos.cliente += (await ValidarGenero.getInstance().process(
       cliente.genero
     ))
       ? ""
       : "Genero, ";
-    camposInvalidos += (await ValidarData.getInstance().process(
+    camposInvalidos.cliente += (await ValidarData.getInstance().process(
       cliente.data_nascimento
     ))
       ? ""
       : "Data Nascimento, ";
-    camposInvalidos += (await ValidarCPF.getInstance().process(cliente.cpf))
+    camposInvalidos.cliente += (await ValidarCPF.getInstance().process(
+      cliente.cpf
+    ))
       ? ""
       : "CPF, ";
-    camposInvalidos += (await ValidarString.getInstance().process(
+    camposInvalidos.cliente += (await ValidarString.getInstance().process(
       cliente.telefone_tipo
     ))
       ? ""
       : "Tipo Telefone, ";
-    camposInvalidos += (await ValidarDDD.getInstance().process(
+    camposInvalidos.cliente += (await ValidarDDD.getInstance().process(
       cliente.telefone_ddd
     ))
       ? ""
       : "DDD, ";
-    camposInvalidos += (await ValidarTelefone.getInstance().process(
+    camposInvalidos.cliente += (await ValidarTelefone.getInstance().process(
       cliente.telefone_numero
     ))
       ? ""
       : "Telefone, ";
-    camposInvalidos += (await ValidarEmail.getInstance().process(cliente.email))
+    camposInvalidos.cliente += (await ValidarEmail.getInstance().process(
+      cliente.email
+    ))
       ? ""
       : "Email, ";
-    camposInvalidos += (await ValidarSenha.getInstance().process(
+    camposInvalidos.cliente += (await ValidarSenha.getInstance().process(
       cliente.senha!
     ))
       ? ""
       : "Senha, ";
+    camposInvalidos.cliente += (await ValidarFavorito.getInstance().process(
+      cliente.cartoes!
+    ))
+      ? ""
+      : "Mais de um cartao favorito, ";
+    camposInvalidos.cliente += (await ValidarFavorito.getInstance().process(
+      cliente.enderecos!
+    ))
+      ? ""
+      : "Mais de um endereco favorito, ";
 
-    if (camposInvalidos) {
-      return camposInvalidos.slice(0, -2); // Remove a última vírgula ', '
+    if (camposInvalidos.cliente) {
+      camposInvalidos.cliente = camposInvalidos.cliente.slice(0, -2); // Remove a última vírgula ', '
+      return camposInvalidos;
     }
-    return "";
 
     if (await ClienteDAO.getInstance().update(id, cliente)) {
-      for (let cartao of cliente.cartoes!) {
+      for (let i = 0; i < cliente.cartoes!.length; i++) {
+        const cartao = cliente.cartoes![i];
         cartao.id_cliente = id!;
-        await CartaoFacade.getInstance().update(cartao.id_cartao!, cartao);
-      }
-      for (let endereco of cliente.enderecos!) {
-        endereco.id_cliente = id!;
-        await EnderecoFacade.getInstance().update(
-          endereco.id_endereco!,
-          endereco
+
+        const camposInvalidosCartao = await CartaoFacade.getInstance().update(
+          cartao.id_cartao!,
+          cartao
         );
+
+        if (camposInvalidosCartao.campos_invalidos) {
+          const key = `cartao_${i}`;
+          camposInvalidos.cartoes[i] = {
+            [key]: camposInvalidosCartao.campos_invalidos,
+          };
+        }
+      }
+
+      for (let i = 0; i < cliente.enderecos!.length; i++) {
+        const endereco = cliente.enderecos![i];
+        endereco.id_cliente = id!;
+
+        const camposInvalidosEndereco =
+          await EnderecoFacade.getInstance().update(
+            endereco.id_endereco!,
+            endereco
+          );
+
+        if (camposInvalidosEndereco.campos_invalidos) {
+          const key = `endereco_${i}`;
+          camposInvalidos.enderecos[i] = {
+            [key]: camposInvalidosEndereco.campos_invalidos,
+          };
+        }
       }
     }
 
-    return "";
+    if (
+      camposInvalidos.cliente !== "" ||
+      camposInvalidos.cartoes.length > 0 ||
+      camposInvalidos.enderecos.length > 0
+    ) {
+      return camposInvalidos;
+    }
+
+    return {};
   }
 
   async delete(id: number): Promise<boolean> {
@@ -194,5 +309,20 @@ export default class ClienteFacade implements IFacade<Cliente> {
 
   async activateOrDeactivate(id: number, ativo: boolean): Promise<boolean> {
     return await ClienteDAO.getInstance().activateOrDeactivate(id, ativo);
+  }
+
+  async changePassword(id: number, senha: string): Promise<string> {
+    const clienteExistente = await ClienteDAO.getInstance().getById(id);
+    if (!clienteExistente) {
+      return "Cliente não encontrado";
+    }
+
+    const resultado = await ClienteDAO.getInstance().changePassword(id, senha);
+
+    if (resultado) {
+      return "Senha alterada com sucesso";
+    }
+
+    return "Erro ao alterar senha";
   }
 }
