@@ -116,7 +116,7 @@ export const updateCliente = async (req: Request, res: Response) => {
     // Retorna o cliente criado caso sucesso
     res.status(200).json(clienteAtualizado);
   } else {
-    res.status(400).json(updatedCliente);
+    res.status(400).json({ campos_invalidos: updatedCliente });
   }
 };
 
