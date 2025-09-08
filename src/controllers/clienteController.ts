@@ -104,9 +104,13 @@ export const updateCliente = async (req: Request, res: Response) => {
   }
 
   // Atualiza o cliente no banco de dados
-  const updatedCliente = await ClienteFachada.getInstance().update(id, {
-    ...clienteAtualizado,
-  });
+  const updatedCliente = await ClienteFachada.getInstance().update(
+    id,
+    {
+      ...clienteAtualizado,
+    },
+    { ...clienteExistente }
+  );
 
   if (Object.keys(updatedCliente).length === 0) {
     // Retorna o cliente criado caso sucesso

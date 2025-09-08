@@ -186,7 +186,11 @@ export default class ClienteFacade implements IFacade<Cliente> {
     return {};
   }
 
-  async update(id: number, cliente: Cliente): Promise<{ [key: string]: any }> {
+  async update(
+    id: number,
+    cliente: Cliente,
+    clienteAtual: Cliente
+  ): Promise<{ [key: string]: any }> {
     let camposInvalidos: {
       cliente: string;
       cartoes: [{}?];
@@ -271,11 +275,23 @@ export default class ClienteFacade implements IFacade<Cliente> {
       for (let i = 0; i < cliente.cartoes!.length; i++) {
         const cartao = cliente.cartoes![i];
         cartao.id_cliente = id!;
+        let camposInvalidosCartao: { [key: string]: any } = {};
 
-        const camposInvalidosCartao = await CartaoFacade.getInstance().update(
-          cartao.id_cartao!,
-          cartao
-        );
+        if (
+          cartao.id_cartao &&
+          clienteAtual.cartoes?.some(
+            (cartaoAtual) => cartaoAtual.id_cartao == cartao.id_cartao
+          )
+        ) {
+          camposInvalidosCartao = await CartaoFacade.getInstance().update(
+            cartao.id_cartao!,
+            cartao
+          );
+        } else {
+          camposInvalidosCartao = await CartaoFacade.getInstance().create(
+            cartao
+          );
+        }
 
         if (camposInvalidosCartao.campos_invalidos) {
           const key = `cartao_${i}`;
@@ -288,12 +304,23 @@ export default class ClienteFacade implements IFacade<Cliente> {
       for (let i = 0; i < cliente.enderecos!.length; i++) {
         const endereco = cliente.enderecos![i];
         endereco.id_cliente = id!;
+        let camposInvalidosEndereco: { [key: string]: any } = {};
 
-        const camposInvalidosEndereco =
-          await EnderecoFacade.getInstance().update(
+        if (
+          endereco.id_endereco &&
+          clienteAtual.enderecos?.some(
+            (enderecoAtual) => enderecoAtual.id_endereco == endereco.id_endereco
+          )
+        ) {
+          camposInvalidosEndereco = await EnderecoFacade.getInstance().update(
             endereco.id_endereco!,
             endereco
           );
+        } else {
+          camposInvalidosEndereco = await EnderecoFacade.getInstance().create(
+            endereco
+          );
+        }
 
         if (camposInvalidosEndereco.campos_invalidos) {
           const key = `endereco_${i}`;
@@ -301,6 +328,31 @@ export default class ClienteFacade implements IFacade<Cliente> {
             [key]: camposInvalidosEndereco.campos_invalidos,
           };
         }
+      }
+
+      const cartoesParaExcluir = clienteAtual.cartoes!.filter(
+        (cartaoAtual) =>
+          !cliente.cartoes!.some(
+            (cartaoNovo) => cartaoNovo.id_cartao == cartaoAtual.id_cartao
+          )
+      );
+
+      for (let cartaoParaExcluir of cartoesParaExcluir) {
+        await CartaoFacade.getInstance().delete(cartaoParaExcluir.id_cartao!);
+      }
+
+      const enderecosParaExcluir = clienteAtual.enderecos!.filter(
+        (enderecoAtual) =>
+          !cliente.enderecos!.some(
+            (enderecoNovo) =>
+              enderecoNovo.id_endereco == enderecoAtual.id_endereco
+          )
+      );
+
+      for (let enderecoParaExcluir of enderecosParaExcluir) {
+        await EnderecoFacade.getInstance().delete(
+          enderecoParaExcluir.id_endereco!
+        );
       }
     }
 
