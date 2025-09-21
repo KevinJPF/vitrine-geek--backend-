@@ -23,7 +23,7 @@ export class ValidarCPF implements IStrategy<string> {
     let cpfLimpo = cpf.replace(/\D/g, "");
     if (cpfLimpo.length !== 11 || /^(\d)\1+$/.test(cpfLimpo)) return false;
 
-    if (await ClienteDAO.getInstance().getByCPF(cpfLimpo, id)) return false;
+    if (await ClienteDAO.getInstance().getByCPF(cpf, id)) return false;
 
     if (this.VALIDATEONLYNUMBERS) return true;
 
