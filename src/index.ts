@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 import clienteRoutes from "./routes/clienteRoutes";
 import cartaoRoutes from "./routes/cartaoRoutes";
 import enderecoRoutes from "./routes/enderecoRoutes";
+import produtoRoutes from "./routes/produtoRoutes";
+import carrinhoRoutes from "./routes/carrinhoRoutes";
+import pedidosRoutes from "./routes/pedidosRoutes";
 
 dotenv.config();
 
@@ -20,6 +23,9 @@ app.use(cors());
 app.use("/clientes", clienteRoutes);
 app.use("/cartoes", cartaoRoutes);
 app.use("/enderecos", enderecoRoutes);
+app.use("/produtos", produtoRoutes);
+app.use("/carrinhos", carrinhoRoutes);
+app.use("/pedidos", pedidosRoutes);
 // #endregion
 
 // Rota padrão

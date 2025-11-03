@@ -72,66 +72,7 @@ export default class ClienteFacade implements IFacade<Cliente> {
       enderecos: [],
     };
 
-    camposInvalidos.cliente += (await ValidarString.getInstance().process(
-      cliente.nome_cliente
-    ))
-      ? ""
-      : "Nome, ";
-    camposInvalidos.cliente += (await ValidarGenero.getInstance().process(
-      cliente.genero
-    ))
-      ? ""
-      : "Genero, ";
-    camposInvalidos.cliente += (await ValidarData.getInstance().process(
-      cliente.data_nascimento
-    ))
-      ? ""
-      : "Data Nascimento, ";
-    camposInvalidos.cliente += (await ValidarCPF.getInstance().process(
-      cliente.cpf
-    ))
-      ? ""
-      : "CPF, ";
-    camposInvalidos.cliente += (await ValidarString.getInstance().process(
-      cliente.telefone_tipo
-    ))
-      ? ""
-      : "Tipo Telefone, ";
-    camposInvalidos.cliente += (await ValidarDDD.getInstance().process(
-      cliente.telefone_ddd
-    ))
-      ? ""
-      : "DDD, ";
-    camposInvalidos.cliente += (await ValidarTelefone.getInstance().process(
-      cliente.telefone_numero
-    ))
-      ? ""
-      : "Telefone, ";
-    camposInvalidos.cliente += (await ValidarEmail.getInstance().process(
-      cliente.email
-    ))
-      ? ""
-      : "Email, ";
-    camposInvalidos.cliente += (await ValidarSenha.getInstance().process(
-      cliente.senha!
-    ))
-      ? ""
-      : "Senha, ";
-    camposInvalidos.cliente += (await ValidarFavorito.getInstance().process(
-      cliente.cartoes!
-    ))
-      ? ""
-      : "Mais de um cartao favorito, ";
-    camposInvalidos.cliente += (await ValidarFavorito.getInstance().process(
-      cliente.enderecos!
-    ))
-      ? ""
-      : "Mais de um endereco favorito, ";
-    camposInvalidos.cliente += (await ValidarEnderecos.getInstance().process(
-      cliente.enderecos!
-    ))
-      ? ""
-      : "Obrigatorio ao menos um endereco de entrega e cobranca, ";
+    camposInvalidos.cliente += await this.validarDadosCliente(cliente);
 
     if (camposInvalidos.cliente) {
       camposInvalidos.cliente = camposInvalidos.cliente.slice(0, -2); // Remove a última vírgula ', '
@@ -201,68 +142,7 @@ export default class ClienteFacade implements IFacade<Cliente> {
       enderecos: [],
     };
 
-    camposInvalidos.cliente += (await ValidarString.getInstance().process(
-      cliente.nome_cliente
-    ))
-      ? ""
-      : "Nome, ";
-    camposInvalidos.cliente += (await ValidarGenero.getInstance().process(
-      cliente.genero
-    ))
-      ? ""
-      : "Genero, ";
-    camposInvalidos.cliente += (await ValidarData.getInstance().process(
-      cliente.data_nascimento
-    ))
-      ? ""
-      : "Data Nascimento, ";
-    camposInvalidos.cliente += (await ValidarCPF.getInstance().process(
-      cliente.cpf,
-      id
-    ))
-      ? ""
-      : "CPF, ";
-    camposInvalidos.cliente += (await ValidarString.getInstance().process(
-      cliente.telefone_tipo
-    ))
-      ? ""
-      : "Tipo Telefone, ";
-    camposInvalidos.cliente += (await ValidarDDD.getInstance().process(
-      cliente.telefone_ddd
-    ))
-      ? ""
-      : "DDD, ";
-    camposInvalidos.cliente += (await ValidarTelefone.getInstance().process(
-      cliente.telefone_numero
-    ))
-      ? ""
-      : "Telefone, ";
-    camposInvalidos.cliente += (await ValidarEmail.getInstance().process(
-      cliente.email,
-      id
-    ))
-      ? ""
-      : "Email, ";
-    camposInvalidos.cliente += (await ValidarSenha.getInstance().process(
-      cliente.senha!
-    ))
-      ? ""
-      : "Senha, ";
-    camposInvalidos.cliente += (await ValidarFavorito.getInstance().process(
-      cliente.cartoes!
-    ))
-      ? ""
-      : "Mais de um cartao favorito, ";
-    camposInvalidos.cliente += (await ValidarFavorito.getInstance().process(
-      cliente.enderecos!
-    ))
-      ? ""
-      : "Mais de um endereco favorito, ";
-    camposInvalidos.cliente += (await ValidarEnderecos.getInstance().process(
-      cliente.enderecos!
-    ))
-      ? ""
-      : "Obrigatorio ao menos um endereco de entrega e cobranca, ";
+    camposInvalidos.cliente += await this.validarDadosCliente(cliente, id);
 
     if (camposInvalidos.cliente) {
       camposInvalidos.cliente = camposInvalidos.cliente.slice(0, -2); // Remove a última vírgula ', '
@@ -388,5 +268,74 @@ export default class ClienteFacade implements IFacade<Cliente> {
     }
 
     return "Erro ao alterar senha";
+  }
+
+  private async validarDadosCliente(
+    cliente: Cliente,
+    id?: number
+  ): Promise<string> {
+    let camposInvalidos: string = "";
+
+    camposInvalidos += (await ValidarString.getInstance().process(
+      cliente.nome_cliente
+    ))
+      ? ""
+      : "Nome, ";
+    camposInvalidos += (await ValidarGenero.getInstance().process(
+      cliente.genero
+    ))
+      ? ""
+      : "Genero, ";
+    camposInvalidos += (await ValidarData.getInstance().process(
+      cliente.data_nascimento
+    ))
+      ? ""
+      : "Data Nascimento, ";
+    camposInvalidos += (await ValidarCPF.getInstance().process(cliente.cpf, id))
+      ? ""
+      : "CPF, ";
+    camposInvalidos += (await ValidarString.getInstance().process(
+      cliente.telefone_tipo
+    ))
+      ? ""
+      : "Tipo Telefone, ";
+    camposInvalidos += (await ValidarDDD.getInstance().process(
+      cliente.telefone_ddd
+    ))
+      ? ""
+      : "DDD, ";
+    camposInvalidos += (await ValidarTelefone.getInstance().process(
+      cliente.telefone_numero
+    ))
+      ? ""
+      : "Telefone, ";
+    camposInvalidos += (await ValidarEmail.getInstance().process(
+      cliente.email,
+      id
+    ))
+      ? ""
+      : "Email, ";
+    camposInvalidos += (await ValidarSenha.getInstance().process(
+      cliente.senha!
+    ))
+      ? ""
+      : "Senha, ";
+    camposInvalidos += (await ValidarFavorito.getInstance().process(
+      cliente.cartoes!
+    ))
+      ? ""
+      : "Mais de um cartao favorito, ";
+    camposInvalidos += (await ValidarFavorito.getInstance().process(
+      cliente.enderecos!
+    ))
+      ? ""
+      : "Mais de um endereco favorito, ";
+    camposInvalidos += (await ValidarEnderecos.getInstance().process(
+      cliente.enderecos!
+    ))
+      ? ""
+      : "Obrigatorio ao menos um endereco de entrega e cobranca, ";
+
+    return camposInvalidos;
   }
 }

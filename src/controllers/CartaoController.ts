@@ -4,11 +4,13 @@ import CartaoFacade from "../facades/CartaoFacade";
 
 const validarCamposObrigatorios = (cartao: any) => {
   const requiredFields = [
+    "nome_cartao",
     "numero",
     "nome_titular",
-    "data_validade",
-    "cvv",
-    "bandeira",
+    "codigo_seguranca",
+    "id_bandeira",
+    "favorito",
+    "id_cliente",
   ];
 
   const missingFields = requiredFields.filter(
@@ -44,9 +46,9 @@ export const createCartao = async (req: Request, res: Response) => {
 
   // Variável com valor de cartão enviado pela requisição
   const novoCartao = new Cartao(
+    req.body.nome_cartao,
     req.body.numero,
     req.body.nome_titular,
-    req.body.data_validade,
     req.body.cvv,
     req.body.bandeira,
     req.body.favorito,
@@ -72,11 +74,11 @@ export const updateCartao = async (req: Request, res: Response) => {
 
   const id = Number(req.params.id);
   const novoCartao = new Cartao(
+    req.body.nome_cartao,
     req.body.numero,
     req.body.nome_titular,
-    req.body.data_validade,
-    req.body.cvv,
-    req.body.bandeira,
+    req.body.codigo_seguranca,
+    req.body.id_bandeira,
     req.body.favorito,
     req.body.id_cliente
   );
