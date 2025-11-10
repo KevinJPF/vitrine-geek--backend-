@@ -56,4 +56,8 @@ export default class ProdutoFacade implements IFacade<Produto> {
   async delete(id: number): Promise<boolean> {
     return await ProdutoDAO.getInstance().delete(id);
   }
+
+  async getCategorias(): Promise<any[]> {
+    return await ProdutoDAO.getInstance().getCategorias();
+  }
 }

@@ -142,4 +142,78 @@ export class PedidoDAO extends BaseDAO<Pedido> {
 
     return (result as any).affectedRows > 0;
   }
+
+  async insertCupomTroca(cupom: any): Promise<boolean> {
+    const [result] = await this.db.query(
+      "INSERT INTO cupons (codigo, tipo_cupom_id, id_cliente, valor, data_validade, ativo, quantidade, pedido_origem_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        "CT" + cupom.id_cliente + cupom.pedido_origem_id,
+        1,
+        cupom.id_cliente,
+        cupom.valor,
+        null,
+        true,
+        1,
+        cupom.pedido_origem_id,
+      ]
+    );
+
+    return (result as any).affectedRows > 0;
+  }
+
+  async getCupomByCodigo(cupomCodigo: string): Promise<Object> {
+    const [rows] = await this.db.query(
+      "SELECT C.* FROM cupons C WHERE C.codigo = ?",
+      [cupomCodigo]
+    );
+
+    return rows as Object;
+  }
+
+  async getPedidosPeriodo(
+    periodoInicio: string,
+    periodoFim: string,
+    produtoId?: number | null,
+    categoriaId?: number | null
+  ): Promise<Pedido[]> {
+    const sql = `
+    SELECT 
+    p.id_pedido AS id_pedido,
+    p.valor_total,
+    p.atualizado_em,
+    c.nome_cliente AS nome_cliente,
+
+    pi.produto_id,
+    pr.nome_produto AS produto_nome,
+    pi.quantidade,
+    pi.valor_total AS valor_total_item,
+    pc.categoria_id,
+    cat.nome AS categoria_nome
+
+    FROM pedidos p
+    JOIN clientes c ON c.id_cliente = p.id_cliente
+    JOIN pedidos_itens pi ON pi.pedido_id = p.id_pedido
+    JOIN produtos pr ON pr.id = pi.produto_id
+    LEFT JOIN produtos_categorias pc ON pc.produto_id = pr.id
+    LEFT JOIN categorias cat ON cat.id = pc.categoria_id
+
+    WHERE p.status_id = 5
+      AND p.atualizado_em BETWEEN ? AND ?
+    AND (? IS NULL OR pi.produto_id = ?)
+    AND (? IS NULL OR pc.categoria_id = ?)
+  `;
+
+    const params = [
+      periodoInicio,
+      periodoFim,
+      produtoId ?? null,
+      produtoId ?? null,
+      categoriaId ?? null,
+      categoriaId ?? null,
+    ];
+
+    const [rows] = await this.db.query(sql, params);
+
+    return rows as Pedido[];
+  }
 }

@@ -111,3 +111,36 @@ export const deletePedido = async (req: Request, res: Response) => {
 
   res.status(200).send(await PedidoFacade.getInstance().delete(id));
 };
+
+export const getCupomByCodigo = async (req: Request, res: Response) => {
+  const codigo = req.query.codigo as string;
+  console.log("Código recebido:", codigo, "Tipo:", typeof codigo);
+  const cupom = await PedidoFacade.getInstance().getCupomByCodigo(
+    codigo.toUpperCase()
+  );
+  if (!cupom) {
+    return res.status(404).json({ message: "Cupom não encontrado" });
+  }
+  res.json(cupom);
+};
+
+export const getPedidosPeriodo = async (req: Request, res: Response) => {
+  const dataInicio = req.query.dataInicio as string;
+  const dataFim = req.query.dataFim as string;
+
+  const produtoId = req.query.produtoId
+    ? Number(req.query.produtoId) || null
+    : null;
+  const categoriaId = req.query.categoriaId
+    ? Number(req.query.categoriaId) || null
+    : null;
+
+  const pedidos = await PedidoFacade.getInstance().getPedidosPeriodo(
+    dataInicio,
+    dataFim,
+    produtoId,
+    categoriaId
+  );
+
+  res.json(pedidos);
+};

@@ -68,4 +68,9 @@ export class ProdutoDAO extends BaseDAO<Produto> {
     );
     return rows as Produto[];
   }
+
+  async getCategorias(): Promise<any[]> {
+    const [rows] = await this.db.query("SELECT * FROM categorias");
+    return rows as any[];
+  }
 }

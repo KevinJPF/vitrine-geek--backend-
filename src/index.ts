@@ -19,6 +19,8 @@ app.use(express.json());
 // Liberar todas as origens (para dev)
 app.use(cors());
 
+console.log("Iniciando o servidor...");
+
 // #region Rotas
 app.use("/clientes", clienteRoutes);
 app.use("/cartoes", cartaoRoutes);

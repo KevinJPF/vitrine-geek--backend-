@@ -5,12 +5,14 @@ import {
   createProduto,
   updateProduto,
   deleteProduto,
+  getCategorias,
 } from "../controllers/ProdutoController";
 
 const router = Router();
 
 // ! Apenas para testes - DELETAR DEPOIS
 router.get("/", getProdutos); // localhost:3000/cartoes
+router.get("/categorias", getCategorias);
 router.get("/:id", getProdutoPorId);
 // router.post("/", createProduto);
 // router.put("/:id", updateProduto);

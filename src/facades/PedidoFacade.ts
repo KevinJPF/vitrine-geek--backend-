@@ -104,8 +104,39 @@ export default class PedidoFacade implements IFacade<Pedido> {
     id: number,
     status_id: number
   ): Promise<{ [key: string]: any }> {
+    if (status_id == 8) {
+      await PedidoDAO.getInstance()
+        .getById(id)
+        .then(async (pedido) => {
+          if (pedido) {
+            await PedidoDAO.getInstance().insertCupomTroca({
+              id_cliente: pedido.id_cliente,
+              valor: pedido.valor_total,
+              pedido_origem_id: pedido.id_pedido,
+            });
+          }
+        });
+    }
     return (await PedidoDAO.getInstance().updateStatus(id, status_id))
       ? {}
       : { status: "erro" };
+  }
+
+  async getCupomByCodigo(codigo: string): Promise<any> {
+    return await PedidoDAO.getInstance().getCupomByCodigo(codigo);
+  }
+
+  async getPedidosPeriodo(
+    dataInicio: string,
+    dataFim: string,
+    produtoId?: number | null,
+    categoriaId?: number | null
+  ): Promise<Pedido[]> {
+    return await PedidoDAO.getInstance().getPedidosPeriodo(
+      dataInicio,
+      dataFim,
+      produtoId,
+      categoriaId
+    );
   }
 }

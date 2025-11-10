@@ -93,3 +93,8 @@ export const deleteProduto = async (req: Request, res: Response) => {
 
   res.status(200).send(await ProdutoFacade.getInstance().delete(id));
 };
+
+export const getCategorias = async (req: Request, res: Response) => {
+  const categorias = await ProdutoFacade.getInstance().getCategorias();
+  res.json(categorias);
+};
