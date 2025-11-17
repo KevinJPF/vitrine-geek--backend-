@@ -7,6 +7,7 @@ import enderecoRoutes from "./routes/enderecoRoutes";
 import produtoRoutes from "./routes/produtoRoutes";
 import carrinhoRoutes from "./routes/carrinhoRoutes";
 import pedidosRoutes from "./routes/pedidosRoutes";
+import iaRoutes from "./routes/iaRoutes";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use("/enderecos", enderecoRoutes);
 app.use("/produtos", produtoRoutes);
 app.use("/carrinhos", carrinhoRoutes);
 app.use("/pedidos", pedidosRoutes);
+app.use("/chat", iaRoutes);
 // #endregion
 
 // Rota padrão
