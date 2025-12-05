@@ -22,7 +22,7 @@ export class ProdutoDAO extends BaseDAO<Produto> {
 
   async getAll(): Promise<Produto[]> {
     const [rows] = await this.db.query(
-      "SELECT P.*, I.* FROM produtos P LEFT JOIN produtos_imagens I ON P.id = I.produto_id"
+      "SELECT P.*, I.url_imagem, I.ordem, I.principal FROM produtos P LEFT JOIN produtos_imagens I ON P.id = I.produto_id"
     );
     return rows as Produto[];
   }

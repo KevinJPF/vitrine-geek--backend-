@@ -74,7 +74,6 @@ export const createPedido = async (req: Request, res: Response) => {
   res.status(201).json(newCartao);
 };
 
-// Não utilizado
 export const updatePedido = async (req: Request, res: Response) => {
   // Verifica se todos os campos obrigatórios estão presentes
   if (req.body.status_id === undefined) {
