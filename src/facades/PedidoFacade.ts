@@ -4,6 +4,7 @@ import { IFacade } from "./IFacade";
 import { getPedidosByClienteId } from "../controllers/PedidoController";
 import { ProdutoDAO } from "../dao/ProdutoDAO";
 import { CarrinhoDAO } from "../dao/CarrinhoDAO";
+import ProdutoFacade from "./ProdutoFacade";
 
 export default class PedidoFacade implements IFacade<Pedido> {
   // #region singletonConfig
@@ -28,7 +29,16 @@ export default class PedidoFacade implements IFacade<Pedido> {
   }
 
   async getById(id: number): Promise<Pedido | null> {
-    return await PedidoDAO.getInstance().getById(id);
+    const pedido = await PedidoDAO.getInstance().getById(id);
+
+    pedido!.produtos = await ProdutoDAO.getInstance().getProdutosByPedidoId(
+      pedido!.id_pedido!
+    );
+    pedido!.pagamentos = await PedidoDAO.getInstance().getPagamentosByPedidoId(
+      pedido!.id_pedido!
+    );
+
+    return pedido;
   }
 
   async create(pedido: Pedido): Promise<{ [key: string]: any }> {
@@ -54,6 +64,14 @@ export default class PedidoFacade implements IFacade<Pedido> {
           valor_total: produto.valor_total ?? 0,
         };
 
+        if (pedido.status_id !== 6) {
+          ProdutoFacade.getInstance().decreaseEstoqueProduto(
+            item.produto_id,
+            item.quantidade,
+            "Saída por realização de pedido"
+          );
+        }
+
         const ok = await PedidoDAO.getInstance().insertPedidoItem(item);
         if (!ok) {
           return { status: "erro_itens" };
@@ -62,6 +80,15 @@ export default class PedidoFacade implements IFacade<Pedido> {
     }
 
     await CarrinhoDAO.getInstance().clearByClienteId(pedido.id_cliente);
+
+    await PedidoDAO.getInstance().registrarLogPedido({
+      pedido_id: insertId,
+      status_anterior: null,
+      status_novo: 1,
+      motivo: "Realização de pedido",
+      usuario_id: 1,
+      tipo_alteracao: "create",
+    });
 
     return {};
   }
@@ -104,19 +131,34 @@ export default class PedidoFacade implements IFacade<Pedido> {
     id: number,
     status_id: number
   ): Promise<{ [key: string]: any }> {
+    const pedido = await this.getById(id);
     if (status_id == 8) {
-      await PedidoDAO.getInstance()
-        .getById(id)
-        .then(async (pedido) => {
-          if (pedido) {
-            await PedidoDAO.getInstance().insertCupomTroca({
-              id_cliente: pedido.id_cliente,
-              valor: pedido.valor_total,
-              pedido_origem_id: pedido.id_pedido,
-            });
-          }
+      if (pedido) {
+        await PedidoDAO.getInstance().insertCupomTroca({
+          id_cliente: pedido.id_cliente,
+          valor: pedido.valor_total,
+          pedido_origem_id: pedido.id_pedido,
         });
+
+        for (let produto of pedido.produtos!) {
+          await ProdutoFacade.getInstance().increaseEstoqueProduto(
+            produto.produto_id,
+            produto.quantidade,
+            "Entrada por troca de pedido"
+          );
+        }
+      }
     }
+
+    await PedidoDAO.getInstance().registrarLogPedido({
+      pedido_id: id,
+      status_anterior: pedido!.status_id!,
+      status_novo: status_id,
+      motivo: "Alteração de status",
+      usuario_id: 1,
+      tipo_alteracao: "atualizacao",
+    });
+
     return (await PedidoDAO.getInstance().updateStatus(id, status_id))
       ? {}
       : { status: "erro" };
@@ -138,5 +180,30 @@ export default class PedidoFacade implements IFacade<Pedido> {
       produtoId,
       categoriaId
     );
+  }
+
+  async realizarTroca(pedidoAtualizado: Pedido): Promise<any> {
+    const pedidoExistente = await this.getById(pedidoAtualizado.id_pedido!);
+    if (!pedidoExistente) {
+      return { status: "erro_pedido_nao_encontrado" };
+    }
+
+    if (pedidoExistente.produtos!.length == pedidoAtualizado.produtos!.length) {
+      this.updateStatus(pedidoAtualizado.id_pedido!, 6);
+      return { status: "sucesso" };
+    } else {
+      this.create(pedidoAtualizado);
+      for (let produto of pedidoAtualizado.produtos!) {
+        await PedidoDAO.getInstance().removePedidoItem(
+          produto.produto_id,
+          pedidoExistente.id_pedido!
+        );
+      }
+      return { status: "sucesso" };
+    }
+  }
+
+  async getAllLogsPedido(): Promise<any[]> {
+    return await PedidoDAO.getInstance().getAllLogsPedido();
   }
 }

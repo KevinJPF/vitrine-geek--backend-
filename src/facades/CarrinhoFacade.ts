@@ -3,6 +3,7 @@ import { ProdutoCarrinho } from "../models/ProdutoCarrinhoModel";
 import { CarrinhoDAO } from "../dao/CarrinhoDAO";
 import { IFacade } from "./IFacade";
 import { ProdutoDAO } from "../dao/ProdutoDAO";
+import ProdutoFacade from "./ProdutoFacade";
 
 export default class CarrinhoFacade implements IFacade<ProdutoCarrinho> {
   // #region singletonConfig
@@ -52,7 +53,17 @@ export default class CarrinhoFacade implements IFacade<ProdutoCarrinho> {
     if (camposInvalidos) {
       return { campos_invalidos: camposInvalidos.slice(0, -2) }; // Remove a última vírgula ', '
     }
-    // return {};
+
+    const produtoOriginal = await ProdutoFacade.getInstance().getById(
+      produto.produto_id
+    );
+
+    if (
+      produto.quantidade > produtoOriginal?.quantidade_disponivel! ||
+      produto.quantidade <= 0
+    ) {
+      return { status: "erro_quantidade_indisponivel" };
+    }
 
     await CarrinhoDAO.getInstance().update(id, produto);
     return {};
@@ -70,7 +81,7 @@ export default class CarrinhoFacade implements IFacade<ProdutoCarrinho> {
     if (produtosCarrinho.length > 0) {
       await Promise.all(
         produtosCarrinho.map(async (produtoCarrinho) => {
-          const dadosProduto = await ProdutoDAO.getInstance().getById(
+          const dadosProduto = await ProdutoFacade.getInstance().getById(
             produtoCarrinho.produto_id
           );
           if (!dadosProduto) {
@@ -78,7 +89,9 @@ export default class CarrinhoFacade implements IFacade<ProdutoCarrinho> {
           }
           produtoCarrinho.nome_produto = dadosProduto.nome_produto;
           produtoCarrinho.valor_venda = dadosProduto.valor_venda;
-          produtoCarrinho.url_imagem = dadosProduto.url_imagem;
+          produtoCarrinho.url_imagem = dadosProduto.imagens.find(
+            (img) => img.principal
+          )?.url_imagem;
         })
       );
     }

@@ -22,7 +22,7 @@ export class PedidoDAO extends BaseDAO<Pedido> {
 
   async getAll(): Promise<Pedido[]> {
     const [rows] = await this.db.query(
-      "SELECT P.*, I.*, S.nome as 'status_nome', S.descricao as 'status_descricao', C.nome_cliente FROM pedidos P LEFT JOIN pedidos_pagamentos I ON P.id_pedido = I.id_pedido LEFT JOIN status_pedido S ON P.status_id = S.id LEFT JOIN clientes C ON P.id_cliente = C.id_cliente"
+      "SELECT P.*, S.nome as 'status_nome', S.descricao as 'status_descricao', C.nome_cliente FROM pedidos P LEFT JOIN status_pedido S ON P.status_id = S.id LEFT JOIN clientes C ON P.id_cliente = C.id_cliente"
     );
     return rows as Pedido[];
   }
@@ -118,9 +118,21 @@ export class PedidoDAO extends BaseDAO<Pedido> {
     return (result as any).affectedRows > 0;
   }
 
+  async removePedidoItem(
+    produtoId: number,
+    pedidoId: number
+  ): Promise<boolean> {
+    const [result] = await this.db.query(
+      "DELETE FROM pedidos_itens WHERE produto_id = ? AND pedido_id = ? ",
+      [produtoId, pedidoId]
+    );
+
+    return (result as any).affectedRows > 0;
+  }
+
   async getByClienteId(clienteId: number): Promise<Pedido[]> {
     const [rows] = await this.db.query(
-      "SELECT P.*, I.*, S.nome as 'status_nome', S.descricao as 'status_descricao' FROM pedidos P LEFT JOIN pedidos_pagamentos I ON P.id_pedido = I.id_pedido LEFT JOIN status_pedido S ON P.status_id = S.id WHERE  P.id_cliente = ?",
+      "SELECT P.*, S.nome as 'status_nome', S.descricao as 'status_descricao' FROM pedidos P LEFT JOIN status_pedido S ON P.status_id = S.id WHERE  P.id_cliente = ?",
       [clienteId]
     );
     return rows as Pedido[];
@@ -215,5 +227,38 @@ export class PedidoDAO extends BaseDAO<Pedido> {
     const [rows] = await this.db.query(sql, params);
 
     return rows as Pedido[];
+  }
+
+  async registrarLogPedido(log: any): Promise<boolean> {
+    const [result] = await this.db.query(
+      "INSERT INTO logs_pedidos (pedido_id, status_ant, status_novo, motivo, usuario_id, tipo_alteracao) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        log.pedido_id,
+        log.status_anterior,
+        log.status_novo,
+        log.motivo,
+        log.usuario_id,
+        log.tipo_alteracao,
+      ]
+    );
+
+    return (result as any).affectedRows > 0;
+  }
+
+  async getAllLogsPedido(): Promise<any[]> {
+    const [rows] = await this.db.query(
+      "SELECT " +
+        "L.*, " +
+        "C.nome_cliente, " +
+        "S1.nome AS nome_status_ant, " +
+        "S2.nome AS nome_status_novo " +
+        "FROM logs_pedidos L " +
+        "LEFT JOIN clientes C ON L.usuario_id = C.id_cliente " +
+        "LEFT JOIN pedidos P ON L.pedido_id = P.id_pedido " +
+        "LEFT JOIN status_pedido S1 ON L.status_ant = S1.id " +
+        "LEFT JOIN status_pedido S2 ON L.status_novo = S2.id " +
+        "ORDER BY L.data_alteracao DESC"
+    );
+    return rows as any[];
   }
 }

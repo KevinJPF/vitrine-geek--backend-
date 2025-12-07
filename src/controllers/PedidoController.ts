@@ -43,7 +43,6 @@ export const getPedidoPorId = async (req: Request, res: Response) => {
   res.json(produto);
 };
 
-// Não utilizado
 export const createPedido = async (req: Request, res: Response) => {
   // Verifica se todos os campos obrigatórios estão presentes
   const missingFields = validarCamposObrigatorios(req.body);
@@ -54,8 +53,8 @@ export const createPedido = async (req: Request, res: Response) => {
     });
   }
 
-  // Variável com valor de produto enviado pela requisição
-  const novoCartao = new Pedido(
+  // Variável com valores do pedido enviado pela requisição
+  const novoPedido = new Pedido(
     req.body.id_cliente,
     req.body.id_endereco_entrega,
     req.body.status_id,
@@ -67,11 +66,11 @@ export const createPedido = async (req: Request, res: Response) => {
     req.body.produtos
   );
 
-  // Cria o cartão no banco de dados
-  const newCartao = await PedidoFacade.getInstance().create(novoCartao);
+  // Cria o pedido no banco de dados
+  const newPedido = await PedidoFacade.getInstance().create(novoPedido);
 
-  // Retorna o cartão criado caso sucesso
-  res.status(201).json(newCartao);
+  // Retorna o pedido criado caso sucesso
+  res.status(201).json(newPedido);
 };
 
 export const updatePedido = async (req: Request, res: Response) => {
@@ -142,4 +141,31 @@ export const getPedidosPeriodo = async (req: Request, res: Response) => {
   );
 
   res.json(pedidos);
+};
+
+export const realizarTroca = async (req: Request, res: Response) => {
+  // Verifica se todos os campos obrigatórios estão presentes
+  const missingFields = validarCamposObrigatorios(req.body);
+
+  const pedidoAtualizado = req.body;
+
+  const id = Number(req.params.id);
+
+  // Verifica se o pedido existe
+  const pedidoExistente = await PedidoFacade.getInstance().getById(id);
+  if (!pedidoExistente) {
+    return res.status(404).json({ message: "Pedido não encontrado" });
+  }
+
+  const resultadoTroca = await PedidoFacade.getInstance().realizarTroca({
+    ...pedidoAtualizado,
+    id_pedido: id,
+  });
+
+  res.json(resultadoTroca);
+};
+
+export const getAllLogsPedido = async (req: Request, res: Response) => {
+  const logs = await PedidoFacade.getInstance().getAllLogsPedido();
+  res.json(logs);
 };

@@ -3,7 +3,22 @@ import { Produto } from "../models/ProdutoModel";
 import ProdutoFacade from "../facades/ProdutoFacade";
 
 const validarCamposObrigatorios = (produto: any) => {
-  const requiredFields = ["nome_produto", "preco_produto"];
+  const requiredFields = [
+    "codigo",
+    "nome_produto",
+    "fabricante_id",
+    "ano_lancamento",
+    "descricao",
+    "codigo_barras",
+    "altura",
+    "largura",
+    "profundidade",
+    "peso",
+    "grupo_precificacao_id",
+    "valor_venda",
+    "quantidade_disponivel",
+    "ativo",
+  ];
 
   const missingFields = requiredFields.filter(
     (field) => !Object.prototype.hasOwnProperty.call(produto, field)
@@ -26,7 +41,6 @@ export const getProdutoPorId = async (req: Request, res: Response) => {
   res.json(produto);
 };
 
-// Não utilizado
 export const createProduto = async (req: Request, res: Response) => {
   // Verifica se todos os campos obrigatórios estão presentes
   const missingFields = validarCamposObrigatorios(req.body);
@@ -38,20 +52,33 @@ export const createProduto = async (req: Request, res: Response) => {
   }
 
   // Variável com valor de produto enviado pela requisição
-  const novoCartao = new Produto(
-    req.body.numero,
-    req.body.nome_titular,
-    req.body.data_validade
+  const novoProduto = new Produto(
+    req.body.codigo,
+    req.body.nome_produto,
+    req.body.fabricante_id,
+    req.body.ano_lancamento,
+    req.body.descricao,
+    req.body.codigo_barras,
+    req.body.altura,
+    req.body.largura,
+    req.body.profundidade,
+    req.body.peso,
+    req.body.grupo_precificacao_id,
+    req.body.valor_venda,
+    req.body.quantidade_disponivel,
+    req.body.ativo,
+    "",
+    req.body.categorias,
+    req.body.imagens
   );
 
   // Cria o cartão no banco de dados
-  const newCartao = await ProdutoFacade.getInstance().create(novoCartao);
+  const newCartao = await ProdutoFacade.getInstance().create(novoProduto);
 
   // Retorna o cartão criado caso sucesso
   res.status(201).json(newCartao);
 };
 
-// Não utilizado
 export const updateProduto = async (req: Request, res: Response) => {
   // Verifica se todos os campos obrigatórios estão presentes
   const missingFields = validarCamposObrigatorios(req.body);
@@ -63,10 +90,24 @@ export const updateProduto = async (req: Request, res: Response) => {
   }
 
   const id = Number(req.params.id);
-  const novoCartao = new Produto(
-    req.body.numero,
-    req.body.nome_titular,
-    req.body.data_validade
+  const novoProduto = new Produto(
+    req.body.codigo,
+    req.body.nome_produto,
+    req.body.fabricante_id,
+    req.body.ano_lancamento,
+    req.body.descricao,
+    req.body.codigo_barras,
+    req.body.altura,
+    req.body.largura,
+    req.body.profundidade,
+    req.body.peso,
+    req.body.grupo_precificacao_id,
+    req.body.valor_venda,
+    req.body.quantidade_disponivel,
+    req.body.ativo,
+    "",
+    req.body.categorias,
+    req.body.imagens
   );
 
   // Verifica se o cartão existe
@@ -77,7 +118,7 @@ export const updateProduto = async (req: Request, res: Response) => {
 
   // Atualiza o cartão no banco de dados
   const updatedCartao = await ProdutoFacade.getInstance().update(id, {
-    ...novoCartao,
+    ...novoProduto,
   });
 
   res.json(updatedCartao);
@@ -97,4 +138,38 @@ export const deleteProduto = async (req: Request, res: Response) => {
 export const getCategorias = async (req: Request, res: Response) => {
   const categorias = await ProdutoFacade.getInstance().getCategorias();
   res.json(categorias);
+};
+
+export const getGruposPrecificacao = async (req: Request, res: Response) => {
+  const grupos = await ProdutoFacade.getInstance().getGruposPrecificacao();
+  res.json(grupos);
+};
+
+export const ativarProduto = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const produtoExistente = await ProdutoFacade.getInstance().getById(id);
+  if (!produtoExistente) {
+    return res.status(404).json({ message: "Produto não encontrado" });
+  }
+  await ProdutoFacade.getInstance().ativarProduto(id, 1, "Ativacao manual");
+  res.status(200).json({ message: "Produto ativado com sucesso" });
+};
+
+export const desativarProduto = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const produtoExistente = await ProdutoFacade.getInstance().getById(id);
+  if (!produtoExistente) {
+    return res.status(404).json({ message: "Produto não encontrado" });
+  }
+  await ProdutoFacade.getInstance().desativarProduto(
+    id,
+    1,
+    "Desativacao manual"
+  );
+  res.status(200).json({ message: "Produto desativado com sucesso" });
+};
+
+export const getAllLogsProduto = async (req: Request, res: Response) => {
+  const logs = await ProdutoFacade.getInstance().getAllLogsProduto();
+  res.json(logs);
 };

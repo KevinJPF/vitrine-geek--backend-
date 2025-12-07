@@ -1,5 +1,6 @@
 import { ProdutoCarrinho } from "../models/ProdutoCarrinhoModel";
 import { BaseDAO } from "./BaseDAO";
+import { ProdutoDAO } from "./ProdutoDAO";
 
 export class CarrinhoDAO extends BaseDAO<ProdutoCarrinho> {
   // #region singletonConfig
